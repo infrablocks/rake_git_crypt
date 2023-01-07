@@ -9,7 +9,7 @@ module RakeGitCrypt
       default_name :init
       default_description 'Initialise git-crypt.'
 
-      action do |task|
+      action do |_task|
         puts('Initialising git-crypt...')
         RubyGitCrypt.init
       end
