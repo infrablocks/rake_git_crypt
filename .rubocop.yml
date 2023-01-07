@@ -1,0 +1,31 @@
+require:
+  - rubocop-rake
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 80
+
+Metrics/BlockLength:
+  AllowedMethods:
+    - describe
+    - context
+    - shared_examples
+    - it
+
+Style/Documentation:
+  Enabled: false
+
+Style/SymbolProc:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 40
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+Gemspec/RequireMFA:
+  Enabled: false
