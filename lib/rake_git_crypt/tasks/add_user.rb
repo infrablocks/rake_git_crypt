@@ -6,9 +6,9 @@ require 'ruby_gpg2'
 
 module RakeGitCrypt
   module Tasks
-    class AddGPGUser < RakeFactory::Task
-      default_name :add_gpg_user
-      default_description 'Add GPG user to git-crypt.'
+    class AddUser < RakeFactory::Task
+      default_name :add_user
+      default_description 'Add user to git-crypt.'
 
       parameter :key_name
 

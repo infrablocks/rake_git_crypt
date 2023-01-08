@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RakeGitCrypt::Tasks::AddGPGUser do
+describe RakeGitCrypt::Tasks::AddUser do
   include_context 'rake'
 
   def define_task(opts = {}, &block)
@@ -13,26 +13,26 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
     end
   end
 
-  it 'adds an add_gpg_user task in the namespace in which it is created' do
+  it 'adds an add_user task in the namespace in which it is created' do
     define_task
 
     expect(Rake.application)
-      .to(have_task_defined('git_crypt:add_gpg_user'))
+      .to(have_task_defined('git_crypt:add_user'))
   end
 
   it 'gives the task a description' do
     define_task
 
-    expect(Rake::Task['git_crypt:add_gpg_user'].full_comment)
-      .to(eq('Add GPG user to git-crypt.'))
+    expect(Rake::Task['git_crypt:add_user'].full_comment)
+      .to(eq('Add user to git-crypt.'))
   end
 
   it 'allows multiple add_gpg_user tasks to be declared' do
     define_task(namespace: :git_crypt1)
     define_task(namespace: :git_crypt2)
 
-    expect(Rake.application).to(have_task_defined('git_crypt1:add_gpg_user'))
-    expect(Rake.application).to(have_task_defined('git_crypt2:add_gpg_user'))
+    expect(Rake.application).to(have_task_defined('git_crypt1:add_user'))
+    expect(Rake.application).to(have_task_defined('git_crypt2:add_user'))
   end
 
   # GNUPGHOME
@@ -43,7 +43,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
     stub_output
     stub_git_crypt_add_gpg_user
 
-    Rake::Task['git_crypt:add_gpg_user'].invoke
+    Rake::Task['git_crypt:add_user'].invoke
 
     expect(RubyGitCrypt)
       .to(have_received(:add_gpg_user))
@@ -55,7 +55,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
     stub_output
     stub_git_crypt_add_gpg_user
 
-    Rake::Task['git_crypt:add_gpg_user'].invoke
+    Rake::Task['git_crypt:add_user'].invoke
 
     expect(RubyGitCrypt)
       .to(have_received(:add_gpg_user)
@@ -71,7 +71,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
     stub_output
     stub_git_crypt_add_gpg_user
 
-    Rake::Task['git_crypt:add_gpg_user'].invoke
+    Rake::Task['git_crypt:add_user'].invoke
 
     expect(RubyGitCrypt)
       .to(have_received(:add_gpg_user)
@@ -86,7 +86,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
     stub_git_crypt_add_gpg_user
 
     expect do
-      Rake::Task['git_crypt:add_gpg_user'].invoke
+      Rake::Task['git_crypt:add_user'].invoke
     end.to(raise_error(RakeFactory::RequiredParameterUnset))
   end
 
@@ -97,7 +97,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
       stub_output
       stub_git_crypt_add_gpg_user
 
-      Rake::Task['git_crypt:add_gpg_user'].invoke
+      Rake::Task['git_crypt:add_user'].invoke
 
       expect(RubyGitCrypt)
         .to(have_received(:add_gpg_user)
@@ -115,7 +115,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
-      Rake::Task['git_crypt:add_gpg_user'].invoke
+      Rake::Task['git_crypt:add_user'].invoke
 
       expect(RubyGPG2)
         .to(have_received(:import)
@@ -134,7 +134,7 @@ describe RakeGitCrypt::Tasks::AddGPGUser do
       stub_gpg_import(import_ok_result(key_id))
       stub_git_crypt_add_gpg_user
 
-      Rake::Task['git_crypt:add_gpg_user'].invoke
+      Rake::Task['git_crypt:add_user'].invoke
 
       expect(RubyGitCrypt)
         .to(have_received(:add_gpg_user)
