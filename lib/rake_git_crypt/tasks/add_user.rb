@@ -63,13 +63,10 @@ module RakeGitCrypt
       def add_gpg_user(gpg_user_id)
         environment =
           gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
-
         RubyGitCrypt.add_gpg_user(
           {
-            key_name: key_name,
-            gpg_user_id: gpg_user_id,
-            no_commit: !commit,
-            trusted: trusted
+            key_name: key_name, gpg_user_id: gpg_user_id,
+            no_commit: !commit, trusted: trusted
           },
           { environment: environment }
         )
