@@ -12,8 +12,12 @@ module RakeGitCrypt
 
       parameter :key_name
 
+      parameter :commit, default: false
+
       parameter :gpg_user_id
       parameter :gpg_user_key_path
+
+      parameter :gpg_home_directory
 
       action do
         validate
@@ -57,8 +61,12 @@ module RakeGitCrypt
 
       def add_gpg_user(gpg_user_id)
         RubyGitCrypt.add_gpg_user(
-          key_name: key_name,
-          gpg_user_id: gpg_user_id
+          {
+            key_name: key_name,
+            gpg_user_id: gpg_user_id,
+            no_commit: !commit
+          },
+          gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
         )
       end
 

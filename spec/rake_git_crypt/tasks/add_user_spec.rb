@@ -35,49 +35,6 @@ describe RakeGitCrypt::Tasks::AddUser do
     expect(Rake.application).to(have_task_defined('git_crypt2:add_user'))
   end
 
-  # GNUPGHOME
-
-  it 'adds a GPG user to git-crypt' do
-    define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
-
-    stub_output
-    stub_git_crypt_add_gpg_user
-
-    Rake::Task['git_crypt:add_user'].invoke
-
-    expect(RubyGitCrypt)
-      .to(have_received(:add_gpg_user))
-  end
-
-  it 'does not provide a key name by default' do
-    define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
-
-    stub_output
-    stub_git_crypt_add_gpg_user
-
-    Rake::Task['git_crypt:add_user'].invoke
-
-    expect(RubyGitCrypt)
-      .to(have_received(:add_gpg_user)
-            .with(hash_including(key_name: nil)))
-  end
-
-  it 'uses the specified key name when provided' do
-    define_task(
-      gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
-      key_name: 'supersecret'
-    )
-
-    stub_output
-    stub_git_crypt_add_gpg_user
-
-    Rake::Task['git_crypt:add_user'].invoke
-
-    expect(RubyGitCrypt)
-      .to(have_received(:add_gpg_user)
-            .with(hash_including(key_name: 'supersecret')))
-  end
-
   it 'raises an error when neither gpg_user_id nor gpg_user_key_path ' \
      'provided' do
     define_task
@@ -91,6 +48,18 @@ describe RakeGitCrypt::Tasks::AddUser do
   end
 
   describe 'when gpg_user_id is provided' do
+    it 'adds a GPG user to git-crypt' do
+      define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user))
+    end
+
     it 'uses the specified GPG user ID to add the GPG user' do
       define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
 
@@ -103,7 +72,97 @@ describe RakeGitCrypt::Tasks::AddUser do
         .to(have_received(:add_gpg_user)
               .with(hash_including(
                       gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82'
-                    )))
+                    ),
+                    anything))
+    end
+
+    it 'does not provide a key name by default' do
+      define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(key_name: nil), anything))
+    end
+
+    it 'uses the specified key name when provided' do
+      define_task(
+        gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
+        key_name: 'supersecret'
+      )
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(key_name: 'supersecret'), anything))
+    end
+
+    it 'does not commit by default' do
+      define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(no_commit: true), anything))
+    end
+
+    it 'uses the specified value for no_commit when provided' do
+      define_task(
+        gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
+        key_name: 'supersecret',
+        commit: true
+      )
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(no_commit: false), anything))
+    end
+
+    it 'does not set a GPG home directory when adding the user to git-crypt' do
+      define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(anything, hash_excluding('GNUPGHOME')))
+    end
+
+    it 'sets the specified GPG home directory when adding the user to ' \
+       'git-crypt when provided' do
+      define_task(
+        gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
+        gpg_home_directory: 'some/directory'
+      )
+
+      stub_output
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(anything, hash_including(GNUPGHOME: 'some/directory')))
     end
   end
 
@@ -125,6 +184,19 @@ describe RakeGitCrypt::Tasks::AddUser do
                     )))
     end
 
+    it 'adds a GPG user to git-crypt' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user))
+    end
+
     it 'uses the ID of the imported GPG key to add the GPG user' do
       key_id = 'A65C6366D55F0BA7719EE38F582D74F22F5601F8'
 
@@ -138,7 +210,70 @@ describe RakeGitCrypt::Tasks::AddUser do
 
       expect(RubyGitCrypt)
         .to(have_received(:add_gpg_user)
-              .with(hash_including(gpg_user_id: key_id)))
+              .with(hash_including(gpg_user_id: key_id), anything))
+    end
+
+    it 'does not provide a key name by default' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(key_name: nil), anything))
+    end
+
+    it 'uses the specified key name when provided' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        key_name: 'supersecret'
+      )
+
+      stub_output
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(key_name: 'supersecret'), anything))
+    end
+
+    it 'does not commit by default' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(no_commit: true), anything))
+    end
+
+    it 'uses the specified value for no_commit when provided' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        key_name: 'supersecret',
+        commit: true
+      )
+
+      stub_output
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(hash_including(no_commit: false), anything))
     end
   end
 

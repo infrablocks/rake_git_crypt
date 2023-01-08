@@ -1,8 +1,6 @@
 TODO
 ====
 
-* Rename AddGPGUser to AddUser
-
 * Finish AddUser task
   * Add option to commit?
   * Use temporary home directory by default
