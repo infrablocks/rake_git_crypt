@@ -13,6 +13,7 @@ module RakeGitCrypt
       parameter :key_name
 
       parameter :commit, default: false
+      parameter :trusted, default: false
 
       parameter :gpg_user_id
       parameter :gpg_user_key_path
@@ -60,13 +61,17 @@ module RakeGitCrypt
       end
 
       def add_gpg_user(gpg_user_id)
+        environment =
+          gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
+
         RubyGitCrypt.add_gpg_user(
           {
             key_name: key_name,
             gpg_user_id: gpg_user_id,
-            no_commit: !commit
+            no_commit: !commit,
+            trusted: trusted
           },
-          gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
+          { environment: environment }
         )
       end
 
