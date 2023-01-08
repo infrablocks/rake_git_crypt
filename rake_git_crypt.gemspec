@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'colored2', '~> 3.1'
   spec.add_dependency 'rake_factory', '~> 0.23'
   spec.add_dependency 'ruby_git_crypt', '0.1.0.pre.2'
+  spec.add_dependency 'ruby_gpg2', '~> 0.6'
 
   spec.add_development_dependency 'activesupport'
   spec.add_development_dependency 'bundler'

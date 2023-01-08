@@ -9,9 +9,13 @@ module RakeGitCrypt
       default_name :init
       default_description 'Initialise git-crypt.'
 
-      action do |_task|
+      parameter :key_name
+
+      action do |task|
         puts('Initialising git-crypt...')
-        RubyGitCrypt.init
+        RubyGitCrypt.init(
+          key_name: task.key_name
+        )
       end
     end
   end

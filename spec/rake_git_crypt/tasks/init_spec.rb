@@ -46,6 +46,32 @@ describe RakeGitCrypt::Tasks::Init do
     expect(RubyGitCrypt).to(have_received(:init))
   end
 
+  it 'does not pass a key name by default' do
+    define_task
+
+    stub_output
+    stub_git_crypt_init
+
+    Rake::Task['git_crypt:init'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:init)
+            .with(hash_including(key_name: nil)))
+  end
+
+  it 'does pass the specified key name when provided' do
+    define_task(key_name: 'supersecret')
+
+    stub_output
+    stub_git_crypt_init
+
+    Rake::Task['git_crypt:init'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:init)
+            .with(hash_including(key_name: 'supersecret')))
+  end
+
   def stub_output
     %i[print puts].each do |method|
       allow($stdout).to(receive(method))
