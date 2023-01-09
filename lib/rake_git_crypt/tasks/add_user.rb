@@ -37,7 +37,8 @@ module RakeGitCrypt
           with_gpg_home_directory do |home_directory|
             result = import_key(home_directory)
             key_fingerprint = lookup_key_fingerprint(result)
-            add_gpg_user(home_directory, key_fingerprint)
+            add_gpg_user(home_directory, key_fingerprint,
+                         auto_trust: gpg_home_directory.nil?)
           end
           log_done
         end
@@ -74,13 +75,13 @@ module RakeGitCrypt
               .first_line.key_fingerprint
       end
 
-      def add_gpg_user(gpg_home_directory, gpg_user_id)
+      def add_gpg_user(gpg_home_directory, gpg_user_id, auto_trust: false)
         RubyGitCrypt.add_gpg_user(
           {
             gpg_user_id: gpg_user_id,
             key_name: key_name,
             no_commit: !commit,
-            trusted: trusted
+            trusted: auto_trust || trusted
           },
           { environment: git_crypt_environment(gpg_home_directory) }
         )

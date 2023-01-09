@@ -345,6 +345,25 @@ describe RakeGitCrypt::Tasks::AddUser do
               ))
     end
 
+    it 'implicitly trusts the key when using a temporary home directory ' \
+       'when adding the GPG user' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_dir_mktmpdir
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(
+                a_hash_including(trusted: true),
+                anything
+              ))
+    end
+
     it 'uses the specified home directory when provided when adding the ' \
        'GPG user' do
       define_task(
@@ -453,11 +472,14 @@ describe RakeGitCrypt::Tasks::AddUser do
               .with(hash_including(no_commit: false), anything))
     end
 
-    it 'does not trust the key by default' do
-      define_task(gpg_user_key_path: 'path/to/gpg.public')
+    it 'does not trust the key when using a specified home directory' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        gpg_home_directory: 'nested/home/directory'
+      )
 
       stub_output
-      stub_dir_mktmpdir
+      stub_file_utils_mkdir_p
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -468,15 +490,16 @@ describe RakeGitCrypt::Tasks::AddUser do
               .with(hash_including(trusted: false), anything))
     end
 
-    it 'uses the specified value for trusted when provided' do
+    it 'uses the specified value for trusted when using a specified ' \
+       'home directory' do
       define_task(
         gpg_user_key_path: 'path/to/gpg.public',
-        key_name: 'supersecret',
+        gpg_home_directory: 'nested/home/directory',
         trusted: true
       )
 
       stub_output
-      stub_dir_mktmpdir
+      stub_file_utils_mkdir_p
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
