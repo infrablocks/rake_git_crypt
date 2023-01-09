@@ -3,12 +3,7 @@ TODO
 
 * Finish AddUser task
   * Add option to commit?
-  * Use temporary home directory by default
 
-* Add Lock task
-  * Lock git crypt for single key name or completely
-* Add Unlock task
-  * Unlock git crypt for single key name or completely
 * Add AddUsers task
   * Add many users at once
 * Add RemoveUser task
@@ -28,6 +23,7 @@ TODO
   * Delete secrets from paths?
 
 * Add Reinstall task
+  * Unlock? 
   * Execute uninstall task
   * Execute install task
   * Regenerate secrets?
