@@ -4,6 +4,8 @@ require 'rake_factory'
 require 'ruby_git_crypt'
 require 'ruby_gpg2'
 
+require_relative '../home'
+
 module RakeGitCrypt
   module Tasks
     class AddUser < RakeFactory::Task
@@ -19,26 +21,36 @@ module RakeGitCrypt
       parameter :gpg_user_key_path
 
       parameter :gpg_home_directory
+      parameter :gpg_work_directory, default: '/tmp'
 
       action do
         validate
 
         if gpg_user_id
           log_adding_by_id
-          add_gpg_user(gpg_user_id)
+          add_gpg_user(gpg_home_directory, gpg_user_id)
           log_done
         end
 
         if gpg_user_key_path
           log_adding_by_key_path
-          result = import_key
-          key_fingerprint = lookup_key_fingerprint(result)
-          add_gpg_user(key_fingerprint)
+          with_gpg_home_directory do |home_directory|
+            result = import_key(home_directory)
+            key_fingerprint = lookup_key_fingerprint(result)
+            add_gpg_user(home_directory, key_fingerprint)
+          end
           log_done
         end
       end
 
       private
+
+      def with_gpg_home_directory(&block)
+        Home.new(gpg_work_directory, gpg_home_directory || :temporary)
+            .with_resolved_directory do |home_directory|
+          block.call(home_directory)
+        end
+      end
 
       def validate
         return if gpg_user_id || gpg_user_key_path
@@ -48,9 +60,11 @@ module RakeGitCrypt
               'but neither was.'
       end
 
-      def import_key
+      def import_key(gpg_home_directory)
         RubyGPG2.import(
           key_file_paths: [gpg_user_key_path],
+          work_directory: gpg_work_directory,
+          home_directory: gpg_home_directory,
           with_status: true
         )
       end
@@ -60,16 +74,20 @@ module RakeGitCrypt
               .first_line.key_fingerprint
       end
 
-      def add_gpg_user(gpg_user_id)
-        environment =
-          gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
+      def add_gpg_user(gpg_home_directory, gpg_user_id)
         RubyGitCrypt.add_gpg_user(
           {
-            key_name: key_name, gpg_user_id: gpg_user_id,
-            no_commit: !commit, trusted: trusted
+            gpg_user_id: gpg_user_id,
+            key_name: key_name,
+            no_commit: !commit,
+            trusted: trusted
           },
-          { environment: environment }
+          { environment: git_crypt_environment(gpg_home_directory) }
         )
+      end
+
+      def git_crypt_environment(gpg_home_directory)
+        gpg_home_directory ? { GNUPGHOME: gpg_home_directory } : {}
       end
 
       def log_adding_by_id
@@ -79,7 +97,7 @@ module RakeGitCrypt
       end
 
       def log_adding_by_key_path
-        puts(
+        $stdout.puts(
           "Adding GPG user with key at: '#{gpg_user_key_path}' to git-crypt..."
         )
       end

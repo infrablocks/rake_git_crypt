@@ -217,10 +217,105 @@ describe RakeGitCrypt::Tasks::AddUser do
                     )))
     end
 
+    it 'uses a temporary home directory by default when importing the key' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_dir_mktmpdir(temporary_directory: '/tmp/home-12345678')
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGPG2)
+        .to(have_received(:import)
+              .with(hash_including(
+                      home_directory: '/tmp/home-12345678'
+                    )))
+    end
+
+    it 'uses the specified home directory when provided when importing ' \
+       'the key' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        gpg_home_directory: 'nested/home/directory'
+      )
+
+      stub_output
+      stub_file_utils_mkdir_p
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGPG2)
+        .to(have_received(:import)
+              .with(hash_including(
+                      home_directory: 'nested/home/directory'
+                    )))
+    end
+
+    it 'ensures the specified home directory exists when provided' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        gpg_home_directory: 'nested/home/directory'
+      )
+
+      stub_output
+      stub_file_utils_mkdir_p
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(FileUtils)
+        .to(have_received(:mkdir_p)
+              .with('nested/home/directory'))
+    end
+
+    it 'uses a work directory of /tmp by default when importing the key' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_dir_mktmpdir(work_directory: '/tmp')
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGPG2)
+        .to(have_received(:import)
+              .with(hash_including(
+                      work_directory: '/tmp'
+                    )))
+    end
+
+    it 'uses the specified work directory when provided when importing ' \
+       'the key' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        gpg_work_directory: 'nested/work/directory'
+      )
+
+      stub_output
+      stub_dir_mktmpdir(work_directory: 'nested/work/directory')
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGPG2)
+        .to(have_received(:import)
+              .with(hash_including(
+                      work_directory: 'nested/work/directory'
+                    )))
+    end
+
     it 'adds a GPG user to git-crypt' do
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -230,12 +325,57 @@ describe RakeGitCrypt::Tasks::AddUser do
         .to(have_received(:add_gpg_user))
     end
 
+    it 'uses a temporary home directory by default when adding the GPG user' do
+      define_task(gpg_user_key_path: 'path/to/gpg.public')
+
+      stub_output
+      stub_dir_mktmpdir(temporary_directory: '/tmp/home-12345678')
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(
+                anything,
+                a_hash_including(
+                  environment: { GNUPGHOME: '/tmp/home-12345678' }
+                )
+              ))
+    end
+
+    it 'uses the specified home directory when provided when adding the ' \
+       'GPG user' do
+      define_task(
+        gpg_user_key_path: 'path/to/gpg.public',
+        gpg_home_directory: 'nested/home/directory'
+      )
+
+      stub_output
+      stub_file_utils_mkdir_p
+      stub_gpg_import
+      stub_git_crypt_add_gpg_user
+
+      Rake::Task['git_crypt:add_user'].invoke
+
+      expect(RubyGitCrypt)
+        .to(have_received(:add_gpg_user)
+              .with(
+                anything,
+                a_hash_including(
+                  environment: { GNUPGHOME: 'nested/home/directory' }
+                )
+              ))
+    end
+
     it 'uses the ID of the imported GPG key to add the GPG user' do
       key_id = 'A65C6366D55F0BA7719EE38F582D74F22F5601F8'
 
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import(import_ok_result(key_id))
       stub_git_crypt_add_gpg_user
 
@@ -250,6 +390,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -267,6 +408,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       )
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -281,6 +423,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -299,6 +442,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       )
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -313,6 +457,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -331,6 +476,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       )
 
       stub_output
+      stub_dir_mktmpdir
       stub_gpg_import
       stub_git_crypt_add_gpg_user
 
@@ -354,6 +500,21 @@ describe RakeGitCrypt::Tasks::AddUser do
     allow(RubyGPG2)
       .to(receive(:import)
             .and_return(result))
+  end
+
+  def stub_dir_mktmpdir(
+    work_directory: '/tmp',
+    prefix: 'home',
+    temporary_directory: '/tmp/home-00000000'
+  )
+    allow(Dir)
+      .to(receive(:mktmpdir)
+            .with(prefix, work_directory)
+            .and_yield(temporary_directory))
+  end
+
+  def stub_file_utils_mkdir_p
+    allow(FileUtils).to(receive(:mkdir_p))
   end
 
   def stub_git_crypt_add_gpg_user
