@@ -1,0 +1,91 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+describe RakeGitCrypt::Tasks::Unlock do
+  include_context 'rake'
+
+  def define_task(opts = {}, &block)
+    opts = { namespace: :git_crypt }.merge(opts)
+
+    namespace opts[:namespace] do
+      subject.define(opts, &block)
+    end
+  end
+
+  it 'adds an unlock task in the namespace in which it is created' do
+    define_task
+
+    expect(Rake.application)
+      .to(have_task_defined('git_crypt:unlock'))
+  end
+
+  it 'gives the task a description' do
+    define_task
+
+    expect(Rake::Task['git_crypt:unlock'].full_comment)
+      .to(eq('Unlock git-crypt.'))
+  end
+
+  it 'allows multiple unlock tasks to be declared' do
+    define_task(namespace: :git_crypt1)
+    define_task(namespace: :git_crypt2)
+
+    expect(Rake.application).to(have_task_defined('git_crypt1:unlock'))
+    expect(Rake.application).to(have_task_defined('git_crypt2:unlock'))
+  end
+
+  it 'unlocks git-crypt for the repository' do
+    define_task
+
+    stub_output
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock'].invoke
+
+    expect(RubyGitCrypt).to(have_received(:unlock))
+  end
+
+  it 'does not pass a key path by default' do
+    define_task
+
+    stub_output
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:unlock)
+            .with(hash_including(key_path: nil)))
+  end
+
+  it 'passes the specified key path when provided' do
+    define_task(
+      key_path: 'path/to/key'
+    )
+
+    stub_output
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:unlock)
+            .with(hash_including(key_path: 'path/to/key')))
+  end
+
+  def stub_output
+    %i[print puts].each do |method|
+      allow($stdout).to(receive(method))
+      allow($stderr).to(receive(method))
+    end
+  end
+
+  def stub_chdir
+    allow(Dir).to(receive(:chdir).and_yield)
+  end
+
+  def stub_git_crypt_unlock
+    allow(RubyGitCrypt).to(receive(:unlock))
+  end
+end

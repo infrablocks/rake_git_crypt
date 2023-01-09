@@ -59,7 +59,7 @@ describe RakeGitCrypt::Tasks::Init do
             .with(hash_including(key_name: nil)))
   end
 
-  it 'does pass the specified key name when provided' do
+  it 'passes the specified key name when provided' do
     define_task(key_name: 'supersecret')
 
     stub_output
