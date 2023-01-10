@@ -6,6 +6,7 @@ TODO
 
 * Add AddUsers task
   * Add many users at once
+
 * Add RemoveUser task
   * Remove user for key name
   * By ID or by key path
@@ -17,6 +18,7 @@ TODO
   * Init git crypt
   * Add all users
   * Optionally commit?
+
 * Add Uninstall task
   * Delete .git/git-crypt directory
   * Delete .git-crypt directory
