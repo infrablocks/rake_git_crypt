@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rake_git_crypt (0.1.0.pre.12)
+    rake_git_crypt (0.1.0.pre.13)
       colored2 (~> 3.1)
       rake_factory (= 0.32.0.pre.2)
       ruby_git_crypt (= 0.1.0.pre.2)
@@ -148,4 +148,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.4.3
+   2.4.5
