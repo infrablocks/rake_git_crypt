@@ -41,20 +41,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ruby_git_crypt', '0.1.0.pre.2'
   spec.add_dependency 'ruby_gpg2', '~> 0.6'
 
-  spec.add_development_dependency 'activesupport'
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'gem-release'
-  spec.add_development_dependency 'memfs'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rake_circle_ci'
-  spec.add_development_dependency 'rake_github'
-  spec.add_development_dependency 'rake_gpg'
-  spec.add_development_dependency 'rake_ssh'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'rubocop-rake'
-  spec.add_development_dependency 'rubocop-rspec'
-  spec.add_development_dependency 'simplecov'
-
   spec.metadata['rubygems_mfa_required'] = 'false'
 end
