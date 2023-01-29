@@ -2,10 +2,10 @@ TODO
 ====
 
 * Finish AddUser task
-  * Add option to commit?
+  * Optionally commit?
 
 * Add AddUsers task
-  * Add many users at once
+  * Allow specifying key directory instead of individual key paths
 * Add RemoveUser task
   * Remove user for key name
   * By ID or by key path
@@ -18,9 +18,7 @@ TODO
   * Add all users
   * Optionally commit?
 * Add Uninstall task
-  * Delete .git/git-crypt directory
-  * Delete .git-crypt directory
-  * Delete secrets from paths?
+  * Optionally commit?
 
 * Add Reinstall task
   * Unlock? 

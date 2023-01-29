@@ -9,12 +9,12 @@ module RakeGitCrypt
       default_name :unlock
       default_description 'Unlock git-crypt.'
 
-      parameter :key_path
+      parameter :key_paths
 
       action do
         puts('Unlocking git-crypt...')
         RubyGitCrypt.unlock(
-          key_path: key_path
+          key_files: key_paths
         )
       end
     end

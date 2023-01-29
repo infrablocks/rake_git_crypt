@@ -2,9 +2,13 @@
 
 require 'rake_factory'
 
+require_relative '../mixins/support'
+
 module RakeGitCrypt
   module Tasks
     class AddUsers < RakeFactory::Task
+      include Mixins::Support
+
       default_name :add_users
       default_description 'Add users to git-crypt.'
 
@@ -45,31 +49,29 @@ module RakeGitCrypt
       end
 
       def ensure_add_user_task_present(task, user_type)
-        unless task_required?(user_type) && (
-          task_name_missing?(user_type) ||
-            !task_defined?(task, user_type))
+        unless add_user_task_required?(user_type) && (
+          add_user_task_name_missing?(user_type) ||
+            !add_user_task_defined?(task, user_type))
           return
         end
 
-        if task_name_missing?(user_type)
+        if add_user_task_name_missing?(user_type)
           raise_add_user_task_name_missing(user_type)
         else
           raise_add_user_task_undefined(user_type)
         end
       end
 
-      def task_name_missing?(user_type)
+      def add_user_task_name_missing?(user_type)
         send(:"add_user_by_#{user_type}_task_name").nil?
       end
 
-      def task_required?(user_type)
+      def add_user_task_required?(user_type)
         gpg_user_details_present?(user_type)
       end
 
-      def task_defined?(task, user_type)
-        !task.application
-             .lookup(send(:"add_user_by_#{user_type}_task_name"), task.scope)
-             .nil?
+      def add_user_task_defined?(task, user_type)
+        task_defined?(task, send(:"add_user_by_#{user_type}_task_name"))
       end
 
       def gpg_user_details_present?(user_type)

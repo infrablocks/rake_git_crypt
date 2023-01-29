@@ -46,7 +46,7 @@ describe RakeGitCrypt::Tasks::Unlock do
     expect(RubyGitCrypt).to(have_received(:unlock))
   end
 
-  it 'does not pass a key path by default' do
+  it 'does not pass any key paths by default' do
     define_task
 
     stub_output
@@ -56,12 +56,15 @@ describe RakeGitCrypt::Tasks::Unlock do
 
     expect(RubyGitCrypt)
       .to(have_received(:unlock)
-            .with(hash_including(key_path: nil)))
+            .with(hash_including(key_files: nil)))
   end
 
-  it 'passes the specified key path when provided' do
+  it 'passes the specified key paths when provided' do
     define_task(
-      key_path: 'path/to/key'
+      key_paths: %w[
+        path/to/key1
+        path/to/key2
+      ]
     )
 
     stub_output
@@ -71,7 +74,10 @@ describe RakeGitCrypt::Tasks::Unlock do
 
     expect(RubyGitCrypt)
       .to(have_received(:unlock)
-            .with(hash_including(key_path: 'path/to/key')))
+            .with(hash_including(key_files: %w[
+                                   path/to/key1
+                                   path/to/key2
+                                 ])))
   end
 
   def stub_output
