@@ -6,6 +6,7 @@ require_relative '../mixins/support'
 
 module RakeGitCrypt
   module Tasks
+    # rubocop:disable Metrics/ClassLength
     class AddUsers < RakeFactory::Task
       include Mixins::Support
 
@@ -60,7 +61,7 @@ module RakeGitCrypt
 
       def ensure_users_provided
         if gpg_user_details_present?(:key_path) ||
-          gpg_user_details_present?(:id)
+           gpg_user_details_present?(:id)
           return
         end
 
@@ -148,5 +149,6 @@ module RakeGitCrypt
         )
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end
