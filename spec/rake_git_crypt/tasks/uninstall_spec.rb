@@ -103,7 +103,7 @@ describe RakeGitCrypt::Tasks::Uninstall do
     end
   end
 
-  describe 'when lock_task_name provided' do
+  describe 'when lock_task_name provided and task is defined' do
     it 'locks git-crypt using the specified lock task' do
       define_task(
         lock_task_name: :lock_all,
@@ -118,6 +118,22 @@ describe RakeGitCrypt::Tasks::Uninstall do
 
       expect(Rake::Task['git_crypt:lock_all'])
         .to(have_received(:invoke))
+    end
+  end
+
+  describe 'when lock_task_name provided and task not defined' do
+    it 'raises an error' do
+      define_task(
+        lock_task_name: :lock_admin_key,
+        additional_top_level_tasks: %i[secrets:delete]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('secrets:delete')
+
+      expect { Rake::Task['git_crypt:uninstall'].invoke }
+        .to(raise_error(RakeFactory::DependencyTaskMissing))
     end
   end
 

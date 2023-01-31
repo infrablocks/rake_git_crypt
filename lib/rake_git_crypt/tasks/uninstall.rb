@@ -37,23 +37,7 @@ module RakeGitCrypt
       def maybe_delete_secrets(task, args)
         return unless delete_secrets_task_name
 
-        unless delete_secrets_task_defined?(task)
-          raise_delete_secrets_task_undefined
-        end
-
         invoke_task_with_name(task, delete_secrets_task_name, args)
-      end
-
-      def delete_secrets_task_defined?(task)
-        task_defined?(task, delete_secrets_task_name)
-      end
-
-      def raise_delete_secrets_task_undefined
-        raise(
-          RakeFactory::DependencyTaskMissing,
-          'The task with name defined in delete_secrets_task_name does not ' \
-          'exist.'
-        )
       end
     end
   end

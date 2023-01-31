@@ -6,6 +6,7 @@ TODO
 
 * Add AddUsers task
   * Allow specifying key directory instead of individual key paths
+  * Optionally commit?
 * Add RemoveUser task
   * Remove user for key name
   * By ID or by key path
@@ -14,8 +15,6 @@ TODO
   * Would need to rotate all secrets in the process
 
 * Add Install task
-  * Init git crypt
-  * Add all users
   * Optionally commit?
 * Add Uninstall task
   * Optionally commit?

@@ -57,6 +57,11 @@ namespace :secrets do
     keys:deploy:generate
     keys:gpg:generate
   ]
+
+  desc 'Delete all secrets.'
+  task :delete do
+    rm_rf 'config/secrets'
+  end
 end
 
 RuboCop::RakeTask.new
