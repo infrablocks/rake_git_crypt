@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module RakeGitCrypt
-  VERSION = '0.1.0.pre.15'
+  VERSION = '0.1.0.pre.16'
 end
