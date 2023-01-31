@@ -34,9 +34,33 @@ module RakeGitCrypt
 
       private
 
+      def gpg_user_key_paths
+        return nil if @gpg_user_key_paths.nil?
+
+        resolve_key_paths(@gpg_user_key_paths)
+      end
+
+      def resolve_key_paths(paths)
+        paths.inject([]) do |acc, key_path|
+          [*acc, *resolve_key_path(key_path)]
+        end
+      end
+
+      def resolve_key_path(path)
+        if File.file?(path)
+          [path]
+        elsif File.directory?(path)
+          resolve_key_paths(
+            Dir.entries(path).reject { |entry| %w[. ..].include?(entry) }
+          )
+        else
+          []
+        end
+      end
+
       def ensure_users_provided
         if gpg_user_details_present?(:key_path) ||
-           gpg_user_details_present?(:id)
+          gpg_user_details_present?(:id)
           return
         end
 

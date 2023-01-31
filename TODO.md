@@ -5,7 +5,6 @@ TODO
   * Optionally commit?
 
 * Add AddUsers task
-  * Allow specifying key directory instead of individual key paths
   * Optionally commit?
 * Add RemoveUser task
   * Remove user for key name
@@ -20,7 +19,6 @@ TODO
   * Optionally commit?
 
 * Add Reinstall task
-  * Unlock? 
   * Execute uninstall task
   * Execute install task
   * Regenerate secrets?

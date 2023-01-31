@@ -56,61 +56,156 @@ describe RakeGitCrypt::Tasks::AddUsers do
   end
 
   describe 'when gpg_user_key_paths provided' do
-    it 'calls the add_user_by_key_path task for each provided key path ' \
-       'by default' do
-      gpg_user_key_paths = %w[
-        path/to/key1.gpg
-        path/to/key2.gpg
-      ]
+    describe 'when key paths represent files' do
+      it 'calls the add_user_by_key_path task for each provided key path ' \
+         'by default' do
+        gpg_user_key_paths = %w[
+          path/to/key1.gpg
+          path/to/key2.gpg
+        ]
 
-      define_task(gpg_user_key_paths: gpg_user_key_paths)
+        define_task(gpg_user_key_paths: gpg_user_key_paths)
 
-      stub_output
-      stub_task('git_crypt:add_user_by_id')
-      stub_task('git_crypt:add_user_by_key_path')
+        stub_output
+        stub_file('path/to/key1.gpg')
+        stub_file('path/to/key2.gpg')
+        stub_task('git_crypt:add_user_by_id')
+        stub_task('git_crypt:add_user_by_key_path')
 
-      Rake::Task['git_crypt:add_users'].invoke
+        Rake::Task['git_crypt:add_users'].invoke
 
-      gpg_user_key_paths.each do |key_path|
+        gpg_user_key_paths.each do |key_path|
+          expect(Rake::Task['git_crypt:add_user_by_key_path'])
+            .to(have_received(:invoke)
+                  .with(key_path))
+        end
+
         expect(Rake::Task['git_crypt:add_user_by_key_path'])
-          .to(have_received(:invoke)
-                .with(key_path))
+          .to(have_received(:reenable)
+                .twice)
       end
 
-      expect(Rake::Task['git_crypt:add_user_by_key_path'])
-        .to(have_received(:reenable)
-              .twice)
+      it 'calls the task specified in add_user_by_key_path_task_name for ' \
+         'each provided key path when provided' do
+        gpg_user_key_paths = %w[
+          path/to/key1.gpg
+          path/to/key2.gpg
+        ]
+
+        define_task(
+          additional_tasks: %i[add_by_id add_by_key],
+          gpg_user_key_paths: gpg_user_key_paths,
+          add_user_by_key_path_task_name: :add_by_key,
+          add_user_by_id_task_name: :add_by_id
+        )
+
+        stub_output
+        stub_file('path/to/key1.gpg')
+        stub_file('path/to/key2.gpg')
+        stub_task('git_crypt:add_by_id')
+        stub_task('git_crypt:add_by_key')
+
+        Rake::Task['git_crypt:add_users'].invoke
+
+        gpg_user_key_paths.each do |key_path|
+          expect(Rake::Task['git_crypt:add_by_key'])
+            .to(have_received(:invoke)
+                  .with(key_path))
+        end
+
+        expect(Rake::Task['git_crypt:add_by_key'])
+          .to(have_received(:reenable)
+                .twice)
+      end
     end
 
-    it 'calls the task specified in add_user_by_key_path_task_name for ' \
-       'each provided key path when provided' do
-      gpg_user_key_paths = %w[
-        path/to/key1.gpg
-        path/to/key2.gpg
-      ]
+    describe 'when key paths represent directories' do
+      it 'calls the add_user_by_key_path task for each file within the ' \
+         'key paths by default' do
+        gpg_user_key_paths = %w[
+          path/to/keys1
+          path/to/keys2
+        ]
 
-      define_task(
-        additional_tasks: %i[add_by_id add_by_key],
-        gpg_user_key_paths: gpg_user_key_paths,
-        add_user_by_key_path_task_name: :add_by_key,
-        add_user_by_id_task_name: :add_by_id
-      )
+        define_task(gpg_user_key_paths: gpg_user_key_paths)
 
-      stub_output
-      stub_task('git_crypt:add_by_id')
-      stub_task('git_crypt:add_by_key')
+        stub_output
+        stub_file('path/to/keys1/key1.gpg')
+        stub_file('path/to/keys2/key1.gpg')
+        stub_file('path/to/keys2/key2.gpg')
+        stub_directory(
+          'path/to/keys1',
+          ['path/to/keys1/key1.gpg']
+        )
+        stub_directory(
+          'path/to/keys2',
+          %w[path/to/keys2/key1.gpg path/to/keys2/key2.gpg]
+        )
+        stub_task('git_crypt:add_user_by_id')
+        stub_task('git_crypt:add_user_by_key_path')
 
-      Rake::Task['git_crypt:add_users'].invoke
+        Rake::Task['git_crypt:add_users'].invoke
 
-      gpg_user_key_paths.each do |key_path|
-        expect(Rake::Task['git_crypt:add_by_key'])
-          .to(have_received(:invoke)
-                .with(key_path))
+        %w[
+          path/to/keys1/key1.gpg
+          path/to/keys2/key1.gpg
+          path/to/keys2/key2.gpg
+        ].each do |key_path|
+          expect(Rake::Task['git_crypt:add_user_by_key_path'])
+            .to(have_received(:invoke)
+                  .with(key_path))
+        end
+
+        expect(Rake::Task['git_crypt:add_user_by_key_path'])
+          .to(have_received(:reenable)
+                .thrice)
       end
 
-      expect(Rake::Task['git_crypt:add_by_key'])
-        .to(have_received(:reenable)
-              .twice)
+      it 'calls the task specified in add_user_by_key_path_task_name for ' \
+         'each file within the provided key paths when provided' do
+        gpg_user_key_paths = %w[
+          path/to/keys1
+          path/to/keys2
+        ]
+
+        define_task(
+          additional_tasks: %i[add_by_id add_by_key],
+          gpg_user_key_paths: gpg_user_key_paths,
+          add_user_by_key_path_task_name: :add_by_key,
+          add_user_by_id_task_name: :add_by_id
+        )
+
+        stub_output
+        stub_file('path/to/keys1/key1.gpg')
+        stub_file('path/to/keys2/key1.gpg')
+        stub_file('path/to/keys2/key2.gpg')
+        stub_directory(
+          'path/to/keys1',
+          ['path/to/keys1/key1.gpg']
+        )
+        stub_directory(
+          'path/to/keys2',
+          %w[path/to/keys2/key1.gpg path/to/keys2/key2.gpg]
+        )
+        stub_task('git_crypt:add_by_id')
+        stub_task('git_crypt:add_by_key')
+
+        Rake::Task['git_crypt:add_users'].invoke
+
+        %w[
+          path/to/keys1/key1.gpg
+          path/to/keys2/key1.gpg
+          path/to/keys2/key2.gpg
+        ].each do |key_path|
+          expect(Rake::Task['git_crypt:add_by_key'])
+            .to(have_received(:invoke)
+                  .with(key_path))
+        end
+
+        expect(Rake::Task['git_crypt:add_by_key'])
+          .to(have_received(:reenable)
+                .thrice)
+      end
     end
 
     it 'raises an error when add_user_by_key_path_task_name is nil' do
@@ -125,6 +220,8 @@ describe RakeGitCrypt::Tasks::AddUsers do
       )
 
       stub_output
+      stub_file('path/to/key1.gpg')
+      stub_file('path/to/key2.gpg')
       stub_task('git_crypt:add_user_by_id')
 
       expect { Rake::Task['git_crypt:add_users'].invoke }
@@ -144,6 +241,8 @@ describe RakeGitCrypt::Tasks::AddUsers do
       )
 
       stub_output
+      stub_file('path/to/key1.gpg')
+      stub_file('path/to/key2.gpg')
       stub_task('git_crypt:add_user_by_id')
 
       expect { Rake::Task['git_crypt:add_users'].invoke }
@@ -249,10 +348,11 @@ describe RakeGitCrypt::Tasks::AddUsers do
 
   describe 'when both gpg_user_key_paths and gpg_user_ids ' \
            'are provided' do
+    # rubocop:disable RSpec/ExampleLength
     it 'adds all specified users' do
       gpg_user_key_paths = %w[
         path/to/key1.gpg
-        path/to/key2.gpg
+        path/to/keys/
       ]
       gpg_user_ids = %w[
         41D2606F66C3FF28874362B61A16916844CE9D82
@@ -265,6 +365,17 @@ describe RakeGitCrypt::Tasks::AddUsers do
       )
 
       stub_output
+      stub_file('path/to/key1.gpg')
+      stub_file('path/to/keys/key2.gpg')
+      stub_file('path/to/keys/nested/key3.gpg')
+      stub_directory(
+        'path/to/keys/',
+        %w[path/to/keys/key2.gpg path/to/keys/nested]
+      )
+      stub_directory(
+        'path/to/keys/nested',
+        %w[path/to/keys/nested/key3.gpg]
+      )
       stub_task('git_crypt:add_user_by_id')
       stub_task('git_crypt:add_user_by_key_path')
 
@@ -280,7 +391,11 @@ describe RakeGitCrypt::Tasks::AddUsers do
         .to(have_received(:reenable)
               .twice)
 
-      gpg_user_key_paths.each do |key_path|
+      %w[
+        path/to/key1.gpg
+        path/to/keys/key2.gpg
+        path/to/keys/nested/key3.gpg
+      ].each do |key_path|
         expect(Rake::Task['git_crypt:add_user_by_key_path'])
           .to(have_received(:invoke)
                 .with(key_path))
@@ -288,8 +403,9 @@ describe RakeGitCrypt::Tasks::AddUsers do
 
       expect(Rake::Task['git_crypt:add_user_by_key_path'])
         .to(have_received(:reenable)
-              .twice)
+              .thrice)
     end
+    # rubocop:enable RSpec/ExampleLength
   end
 
   def stub_output
@@ -297,6 +413,20 @@ describe RakeGitCrypt::Tasks::AddUsers do
       allow($stdout).to(receive(method))
       allow($stderr).to(receive(method))
     end
+  end
+
+  def stub_file(path)
+    allow(File).to(receive(:file?).with(path).and_return(true))
+    allow(File).to(receive(:directory?).with(path).and_return(false))
+  end
+
+  def stub_directory(path, entries)
+    allow(File).to(receive(:file?).with(path).and_return(false))
+    allow(File).to(receive(:directory?).with(path).and_return(true))
+    allow(Dir)
+      .to(receive(:entries)
+            .with(path)
+            .and_return(['.', '..', *entries]))
   end
 
   def stub_task(task_name)
