@@ -14,10 +14,9 @@ TODO
   * Would need to rotate all secrets in the process
 
 * Add Install task
-  * Optionally commit?
+  * Optionally provision secrets
 * Add Uninstall task
-  * Handle already unlocked 
-  * Optionally commit?
+  * Handle already unlocked
 
 * Add Reinstall task
   * Execute uninstall task

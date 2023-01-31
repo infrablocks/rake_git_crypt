@@ -13,13 +13,17 @@ module RakeGitCrypt
       default_name :install
       default_description 'Install git-crypt.'
 
+      parameter(:commit_message, default: 'Installing git-crypt.')
+
       parameter(:init_task_name, default: :init)
       parameter(:add_users_task_name, default: :add_users)
+      parameter(:commit_task_name)
 
       action do |task, args|
         puts('Installing git-crypt...')
         init_git_crypt(task, args)
         add_users_to_git_crypt(task, args)
+        maybe_commit(task, args)
       end
 
       private
@@ -30,6 +34,15 @@ module RakeGitCrypt
 
       def add_users_to_git_crypt(task, args)
         invoke_task_with_name(task, add_users_task_name, args)
+      end
+
+      def maybe_commit(task, args)
+        return unless commit_task_name
+
+        invoke_task_with_name(
+          task, commit_task_name,
+          [commit_message, *args]
+        )
       end
     end
   end

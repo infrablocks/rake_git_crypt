@@ -13,14 +13,18 @@ module RakeGitCrypt
       default_name :uninstall
       default_description 'Uninstall git-crypt.'
 
+      parameter(:commit_message, default: 'Uninstalling git-crypt.')
+
       parameter(:lock_task_name, default: :lock)
       parameter(:delete_secrets_task_name)
+      parameter(:commit_task_name)
 
       action do |task, args|
         puts('Uninstalling git-crypt...')
         lock_git_crypt(task, args)
         delete_git_crypt_directories
         maybe_delete_secrets(task, args)
+        maybe_commit(task, args)
       end
 
       private
@@ -38,6 +42,15 @@ module RakeGitCrypt
         return unless delete_secrets_task_name
 
         invoke_task_with_name(task, delete_secrets_task_name, args)
+      end
+
+      def maybe_commit(task, args)
+        return unless commit_task_name
+
+        invoke_task_with_name(
+          task, commit_task_name,
+          [commit_message, *args]
+        )
       end
     end
   end

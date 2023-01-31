@@ -171,6 +171,60 @@ describe RakeGitCrypt::Tasks::Uninstall do
     end
   end
 
+  describe 'when commit_task_name provided and task is defined' do
+    it 'commits with an appropriate message by default' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Uninstalling git-crypt.'))
+    end
+
+    it 'uses the specified commit message when provided' do
+      define_task(
+        commit_task_name: :'git:commit',
+        commit_message: 'Removing git-crypt.',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Removing git-crypt.'))
+    end
+  end
+
+  describe 'when commit_task_name provided and task not defined' do
+    it 'raises an error' do
+      define_task(
+        commit_task_name: :'git:commit'
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+
+      expect { Rake::Task['git_crypt:uninstall'].invoke }
+        .to(raise_error(RakeFactory::DependencyTaskMissing))
+    end
+  end
+
   def stub_output
     %i[print puts].each do |method|
       allow($stdout).to(receive(method))

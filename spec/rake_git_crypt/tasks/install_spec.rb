@@ -156,6 +156,60 @@ describe RakeGitCrypt::Tasks::Install do
     end
   end
 
+  describe 'when commit_task_name provided and task is defined' do
+    it 'commits with an appropriate message by default' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Installing git-crypt.'))
+    end
+
+    it 'uses the specified commit message when provided' do
+      define_task(
+        commit_task_name: :'git:commit',
+        commit_message: 'Adding git-crypt.',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Adding git-crypt.'))
+    end
+  end
+
+  describe 'when commit_task_name provided and task not defined' do
+    it 'raises an error' do
+      define_task(
+        commit_task_name: :'git:commit'
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      expect { Rake::Task['git_crypt:install'].invoke }
+        .to(raise_error(RakeFactory::DependencyTaskMissing))
+    end
+  end
+
   def stub_output
     %i[print puts].each do |method|
       allow($stdout).to(receive(method))
