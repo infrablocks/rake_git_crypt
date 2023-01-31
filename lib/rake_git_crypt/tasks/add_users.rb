@@ -36,9 +36,12 @@ module RakeGitCrypt
       private
 
       def gpg_user_key_paths
-        return nil if @gpg_user_key_paths.nil?
+        parameter = self.class.parameter_set.find(:gpg_user_key_paths)
+        key_paths = parameter.get(self)
 
-        resolve_key_paths(@gpg_user_key_paths)
+        return nil if key_paths.nil?
+
+        resolve_key_paths(key_paths)
       end
 
       def resolve_key_paths(paths)
@@ -51,12 +54,16 @@ module RakeGitCrypt
         if File.file?(path)
           [path]
         elsif File.directory?(path)
-          resolve_key_paths(
-            Dir.entries(path).reject { |entry| %w[. ..].include?(entry) }
-          )
+          resolve_key_paths(list_directory(path))
         else
           []
         end
+      end
+
+      def list_directory(path)
+        Dir.entries(path)
+           .reject { |entry| %w[. ..].include?(entry) }
+           .map { |entry| File.join(path, entry) }
       end
 
       def ensure_users_provided

@@ -135,11 +135,11 @@ describe RakeGitCrypt::Tasks::AddUsers do
         stub_file('path/to/keys2/key2.gpg')
         stub_directory(
           'path/to/keys1',
-          ['path/to/keys1/key1.gpg']
+          ['key1.gpg']
         )
         stub_directory(
           'path/to/keys2',
-          %w[path/to/keys2/key1.gpg path/to/keys2/key2.gpg]
+          %w[key1.gpg key2.gpg]
         )
         stub_task('git_crypt:add_user_by_id')
         stub_task('git_crypt:add_user_by_key_path')
@@ -181,11 +181,11 @@ describe RakeGitCrypt::Tasks::AddUsers do
         stub_file('path/to/keys2/key2.gpg')
         stub_directory(
           'path/to/keys1',
-          ['path/to/keys1/key1.gpg']
+          ['key1.gpg']
         )
         stub_directory(
           'path/to/keys2',
-          %w[path/to/keys2/key1.gpg path/to/keys2/key2.gpg]
+          %w[key1.gpg key2.gpg]
         )
         stub_task('git_crypt:add_by_id')
         stub_task('git_crypt:add_by_key')
@@ -370,11 +370,11 @@ describe RakeGitCrypt::Tasks::AddUsers do
       stub_file('path/to/keys/nested/key3.gpg')
       stub_directory(
         'path/to/keys/',
-        %w[path/to/keys/key2.gpg path/to/keys/nested]
+        %w[key2.gpg nested]
       )
       stub_directory(
         'path/to/keys/nested',
-        %w[path/to/keys/nested/key3.gpg]
+        %w[key3.gpg]
       )
       stub_task('git_crypt:add_user_by_id')
       stub_task('git_crypt:add_user_by_key_path')

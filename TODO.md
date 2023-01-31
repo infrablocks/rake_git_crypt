@@ -16,6 +16,7 @@ TODO
 * Add Install task
   * Optionally commit?
 * Add Uninstall task
+  * Handle already unlocked 
   * Optionally commit?
 
 * Add Reinstall task
