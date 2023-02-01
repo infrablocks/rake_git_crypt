@@ -2,7 +2,6 @@
 
 require 'rake_factory'
 require 'ruby_git_crypt'
-require 'open4'
 
 module RakeGitCrypt
   module Tasks
@@ -23,7 +22,7 @@ module RakeGitCrypt
             all: all
           )
           puts('Locked.')
-        rescue Open4::SpawnError
+        rescue RubyGitCrypt::Errors::ExecutionError
           puts('Already locked.')
         end
       end

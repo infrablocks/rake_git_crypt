@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'open4'
 
 describe RakeGitCrypt::Tasks::Lock do
   include_context 'rake'
@@ -131,16 +130,11 @@ describe RakeGitCrypt::Tasks::Lock do
     it 'does not raise an error' do
       define_task
 
-      # rubocop:disable RSpec/VerifiedDoubleReference
-      exitstatus = instance_double('exit status').as_null_object
-      # rubocop:enable RSpec/VerifiedDoubleReference
-      spawn_error = Open4::SpawnError.new('thing', exitstatus)
-
       stub_output
 
       allow(RubyGitCrypt)
         .to(receive(:lock)
-              .and_raise(spawn_error))
+              .and_raise(RubyGitCrypt::Errors::ExecutionError))
 
       expect { Rake::Task['git_crypt:lock'].invoke }
         .not_to(raise_error(Exception))
