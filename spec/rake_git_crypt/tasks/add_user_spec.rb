@@ -6,9 +6,21 @@ describe RakeGitCrypt::Tasks::AddUser do
   include_context 'rake'
 
   def define_task(opts = {}, &block)
-    opts = { namespace: :git_crypt }.merge(opts)
+    opts = {
+      namespace: :git_crypt,
+      additional_namespaced_tasks: %i[add_user_by_id add_user_by_key_path],
+      additional_top_level_tasks: %i[]
+    }.merge(opts)
+
+    opts[:additional_top_level_tasks].each do |t|
+      task t
+    end
 
     namespace opts[:namespace] do
+      opts[:additional_namespaced_tasks].each do |t|
+        task t
+      end
+
       subject.define(opts, &block)
     end
   end
@@ -105,7 +117,7 @@ describe RakeGitCrypt::Tasks::AddUser do
               .with(hash_including(key_name: 'supersecret'), anything))
     end
 
-    it 'does not commit by default' do
+    it 'does not allow git-crypt to commit by default' do
       define_task(gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82')
 
       stub_output
@@ -122,7 +134,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(
         gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
         key_name: 'supersecret',
-        commit: true
+        allow_git_crypt_commit: true
       )
 
       stub_output
@@ -152,7 +164,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(
         gpg_user_id: '41D2606F66C3FF28874362B61A16916844CE9D82',
         key_name: 'supersecret',
-        trusted: true
+        allow_untrusted_keys: true
       )
 
       stub_output
@@ -196,6 +208,89 @@ describe RakeGitCrypt::Tasks::AddUser do
                     hash_including(
                       environment: { GNUPGHOME: 'some/directory' }
                     )))
+    end
+
+    describe 'when commit_task_name provided and task is defined' do
+      it 'commits with an appropriate message by default' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke)
+                .with("Adding git-crypt GPG user with ID: '#{gpg_user_id}'."))
+      end
+
+      it 'uses the specified commit message template when provided' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          key_name: 'admin',
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit',
+          commit_message_template:
+            "Adding user for key: '<%= @task.key_name %>'.",
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke)
+                .with("Adding user for key: 'admin'."))
+      end
+
+      it 'calls commit after adding the GPG user' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(RubyGitCrypt)
+          .to(have_received(:add_gpg_user).ordered)
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke).ordered)
+      end
+    end
+
+    describe 'when commit_task_name provided and task not defined' do
+      it 'raises an error' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit'
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+
+        expect { Rake::Task['git_crypt:add_user'].invoke }
+          .to(raise_error(RakeFactory::DependencyTaskMissing))
+      end
     end
   end
 
@@ -438,7 +533,7 @@ describe RakeGitCrypt::Tasks::AddUser do
               .with(hash_including(key_name: 'supersecret'), anything))
     end
 
-    it 'does not commit by default' do
+    it 'does not allow git-crypt to commit by default' do
       define_task(gpg_user_key_path: 'path/to/gpg.public')
 
       stub_output
@@ -457,7 +552,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(
         gpg_user_key_path: 'path/to/gpg.public',
         key_name: 'supersecret',
-        commit: true
+        allow_git_crypt_commit: true
       )
 
       stub_output
@@ -495,7 +590,7 @@ describe RakeGitCrypt::Tasks::AddUser do
       define_task(
         gpg_user_key_path: 'path/to/gpg.public',
         gpg_home_directory: 'nested/home/directory',
-        trusted: true
+        allow_untrusted_keys: true
       )
 
       stub_output
@@ -508,6 +603,94 @@ describe RakeGitCrypt::Tasks::AddUser do
       expect(RubyGitCrypt)
         .to(have_received(:add_gpg_user)
               .with(hash_including(trusted: true), anything))
+    end
+
+    describe 'when commit_task_name provided and task is defined' do
+      it 'commits with an appropriate message by default' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke)
+                .with('Adding git-crypt GPG user with key path: ' \
+                      "'#{gpg_user_key_path}'."))
+      end
+
+      it 'uses the specified commit message template when provided' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          key_name: 'admin',
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit',
+          commit_message_template:
+            "Adding user for key: '<%= @task.key_name %>'.",
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke)
+                .with("Adding user for key: 'admin'."))
+      end
+
+      it 'calls commit after adding the GPG user' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(RubyGitCrypt)
+          .to(have_received(:add_gpg_user).ordered)
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke).ordered)
+      end
+    end
+
+    describe 'when commit_task_name provided and task not defined' do
+      it 'raises an error' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit'
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+
+        expect { Rake::Task['git_crypt:add_user'].invoke }
+          .to(raise_error(RakeFactory::DependencyTaskMissing))
+      end
     end
   end
 
@@ -542,6 +725,11 @@ describe RakeGitCrypt::Tasks::AddUser do
 
   def stub_git_crypt_add_gpg_user
     allow(RubyGitCrypt).to(receive(:add_gpg_user))
+  end
+
+  def stub_task(task_name)
+    allow(Rake::Task[task_name]).to(receive(:invoke))
+    allow(Rake::Task[task_name]).to(receive(:reenable))
   end
 
   def import_ok_result(key_id = 'E0637AE8F9059A371245DB3844528004E095862C')

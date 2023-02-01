@@ -16,6 +16,9 @@ module RakeGitCrypt
       parameter :gpg_user_key_paths, default: []
       parameter :gpg_user_ids, default: []
 
+      parameter(:commit_message_template,
+                default: 'Adding users to git-crypt.')
+
       parameter(
         :add_user_by_id_task_name,
         default: :add_user_by_id
@@ -24,13 +27,15 @@ module RakeGitCrypt
         :add_user_by_key_path_task_name,
         default: :add_user_by_key_path
       )
+      parameter(:commit_task_name)
 
-      action do |t, args|
+      action do |task, args|
         ensure_users_provided
-        ensure_tasks_present(t)
+        ensure_tasks_present(task)
 
-        add_users_by_key_paths(t, args)
-        add_users_by_ids(t, args)
+        add_users_by_key_paths(task, args)
+        add_users_by_ids(task, args)
+        maybe_commit(task, args)
       end
 
       private
@@ -68,7 +73,7 @@ module RakeGitCrypt
 
       def ensure_users_provided
         if gpg_user_details_present?(:key_path) ||
-           gpg_user_details_present?(:id)
+          gpg_user_details_present?(:id)
           return
         end
 
@@ -155,7 +160,22 @@ module RakeGitCrypt
           'must be provided.'
         )
       end
+
+      def maybe_commit(task, args)
+        return unless commit_task_name
+
+        invoke_task_with_name(
+          task, commit_task_name,
+          [commit_message(task), *args]
+        )
+      end
+
+      def commit_message(task)
+        Template.new(commit_message_template)
+                .render(task: task)
+      end
     end
+
     # rubocop:enable Metrics/ClassLength
   end
 end

@@ -5,17 +5,21 @@ require 'ruby_git_crypt'
 require 'ruby_gpg2'
 
 require_relative '../home'
+require_relative '../template'
+require_relative '../mixins/support'
 
 module RakeGitCrypt
   module Tasks
     class AddUser < RakeFactory::Task
+      include Mixins::Support
+
       default_name :add_user
       default_description 'Add user to git-crypt.'
 
       parameter :key_name
 
-      parameter :commit, default: false
-      parameter :trusted, default: false
+      parameter :allow_git_crypt_commit, default: false
+      parameter :allow_untrusted_keys, default: false
 
       parameter :gpg_user_id
       parameter :gpg_user_key_path
@@ -23,16 +27,19 @@ module RakeGitCrypt
       parameter :gpg_home_directory
       parameter :gpg_work_directory, default: '/tmp'
 
-      action do
+      parameter :commit_message_template,
+                default: 'Adding git-crypt GPG user with <%= @type %>: ' \
+                         "'<%= @value %>'."
+
+      parameter :commit_task_name
+
+      action do |task, args|
         validate
 
         if gpg_user_id
           log_adding_by_id
           add_gpg_user(gpg_home_directory, gpg_user_id)
-          log_done
-        end
-
-        if gpg_user_key_path
+        elsif gpg_user_key_path
           log_adding_by_key_path
           with_gpg_home_directory do |home_directory|
             result = import_key(home_directory)
@@ -40,8 +47,10 @@ module RakeGitCrypt
             add_gpg_user(home_directory, key_fingerprint,
                          auto_trust: gpg_home_directory.nil?)
           end
-          log_done
         end
+
+        maybe_commit(task, args)
+        log_done
       end
 
       private
@@ -80,11 +89,27 @@ module RakeGitCrypt
           {
             gpg_user_id: gpg_user_id,
             key_name: key_name,
-            no_commit: !commit,
-            trusted: auto_trust || trusted
+            no_commit: !allow_git_crypt_commit,
+            trusted: auto_trust || allow_untrusted_keys
           },
           { environment: git_crypt_environment(gpg_home_directory) }
         )
+      end
+
+      def maybe_commit(task, args)
+        return unless commit_task_name
+
+        invoke_task_with_name(
+          task, commit_task_name,
+          [commit_message(task), *args]
+        )
+      end
+
+      def commit_message(task)
+        Template.new(commit_message_template)
+                .render(type: gpg_user_id ? 'ID' : 'key path',
+                        value: gpg_user_id || gpg_user_key_path,
+                        task: task)
       end
 
       def git_crypt_environment(gpg_home_directory)

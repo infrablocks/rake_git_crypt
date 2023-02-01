@@ -193,7 +193,7 @@ describe RakeGitCrypt::Tasks::Uninstall do
     it 'uses the specified commit message when provided' do
       define_task(
         commit_task_name: :'git:commit',
-        commit_message: 'Removing git-crypt.',
+        commit_message_template: 'Removing git-crypt.',
         additional_top_level_tasks: %i[git:commit]
       )
 
@@ -207,6 +207,36 @@ describe RakeGitCrypt::Tasks::Uninstall do
       expect(Rake::Task['git:commit'])
         .to(have_received(:invoke)
               .with('Removing git-crypt.'))
+    end
+
+    it 'calls commit after uninstalling git crypt' do
+      define_task(
+        delete_secrets_task_name: :'secrets:delete',
+        commit_task_name: :'git:commit',
+        commit_message_template: 'Removing git-crypt.',
+        additional_top_level_tasks: %i[git:commit secrets:delete]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('secrets:delete')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git_crypt:lock'])
+        .to(have_received(:invoke).ordered)
+      expect(FileUtils)
+        .to(have_received(:rm_rf)
+              .with('.git-crypt').ordered)
+      expect(FileUtils)
+        .to(have_received(:rm_rf)
+              .with('.git/git-crypt').ordered)
+      expect(Rake::Task['secrets:delete'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke).ordered)
     end
   end
 

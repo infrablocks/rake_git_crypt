@@ -13,7 +13,8 @@ module RakeGitCrypt
       default_name :uninstall
       default_description 'Uninstall git-crypt.'
 
-      parameter(:commit_message, default: 'Uninstalling git-crypt.')
+      parameter(:commit_message_template,
+                default: 'Uninstalling git-crypt.')
 
       parameter(:lock_task_name, default: :lock)
       parameter(:delete_secrets_task_name)
@@ -49,8 +50,13 @@ module RakeGitCrypt
 
         invoke_task_with_name(
           task, commit_task_name,
-          [commit_message, *args]
+          [commit_message(task), *args]
         )
+      end
+
+      def commit_message(task)
+        Template.new(commit_message_template)
+                .render(task: task)
       end
     end
   end

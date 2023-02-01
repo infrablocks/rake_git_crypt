@@ -8,11 +8,16 @@ describe RakeGitCrypt::Tasks::AddUsers do
   def define_task(opts = {}, &block)
     opts = {
       namespace: :git_crypt,
-      additional_tasks: %i[add_user_by_id add_user_by_key_path]
+      additional_namespaced_tasks: %i[add_user_by_id add_user_by_key_path],
+      additional_top_level_tasks: %i[]
     }.merge(opts)
 
+    opts[:additional_top_level_tasks].each do |t|
+      task t
+    end
+
     namespace opts[:namespace] do
-      opts[:additional_tasks].each do |t|
+      opts[:additional_namespaced_tasks].each do |t|
         task t
       end
 
@@ -93,7 +98,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
         ]
 
         define_task(
-          additional_tasks: %i[add_by_id add_by_key],
+          additional_namespaced_tasks: %i[add_by_id add_by_key],
           gpg_user_key_paths: gpg_user_key_paths,
           add_user_by_key_path_task_name: :add_by_key,
           add_user_by_id_task_name: :add_by_id
@@ -169,7 +174,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
         ]
 
         define_task(
-          additional_tasks: %i[add_by_id add_by_key],
+          additional_namespaced_tasks: %i[add_by_id add_by_key],
           gpg_user_key_paths: gpg_user_key_paths,
           add_user_by_key_path_task_name: :add_by_key,
           add_user_by_id_task_name: :add_by_id
@@ -285,7 +290,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        additional_tasks: %i[add_by_id add_by_key],
+        additional_namespaced_tasks: %i[add_by_id add_by_key],
         gpg_user_ids: gpg_user_ids,
         add_user_by_key_path_task_name: :add_by_key,
         add_user_by_id_task_name: :add_by_id
@@ -406,6 +411,103 @@ describe RakeGitCrypt::Tasks::AddUsers do
               .thrice)
     end
     # rubocop:enable RSpec/ExampleLength
+  end
+
+  describe 'when commit_task_name provided and task is defined' do
+    it 'commits with an appropriate message by default' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:add_users'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Adding users to git-crypt.'))
+    end
+
+    it 'uses the specified commit message template when provided' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        commit_message_template:
+          'Adding git-crypt users: <%= @task.gpg_user_key_paths %>.',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:add_users'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke)
+              .with('Adding git-crypt users: ["path/to/key.gpg"].'))
+    end
+
+    it 'calls commit after adding the GPG users' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:add_users'].invoke
+
+      expect(Rake::Task['git_crypt:add_user_by_key_path'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:add_user_by_key_path'])
+        .to(have_received(:reenable).ordered)
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke).ordered)
+    end
+  end
+
+  describe 'when commit_task_name provided and task not defined' do
+    it 'raises an error' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        commit_message: 'Adding git-crypt users.'
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+
+      expect { Rake::Task['git_crypt:add_users'].invoke }
+        .to(raise_error(RakeFactory::DependencyTaskMissing))
+    end
   end
 
   def stub_output

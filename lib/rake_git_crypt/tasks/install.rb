@@ -13,7 +13,8 @@ module RakeGitCrypt
       default_name :install
       default_description 'Install git-crypt.'
 
-      parameter(:commit_message, default: 'Installing git-crypt.')
+      parameter(:commit_message_template,
+                default: 'Installing git-crypt.')
 
       parameter(:init_task_name, default: :init)
       parameter(:add_users_task_name, default: :add_users)
@@ -41,8 +42,13 @@ module RakeGitCrypt
 
         invoke_task_with_name(
           task, commit_task_name,
-          [commit_message, *args]
+          [commit_message(task), *args]
         )
+      end
+
+      def commit_message(task)
+        Template.new(commit_message_template)
+                .render(task: task)
       end
     end
   end
