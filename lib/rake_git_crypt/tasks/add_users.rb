@@ -38,8 +38,6 @@ module RakeGitCrypt
         maybe_commit(task, args)
       end
 
-      private
-
       def gpg_user_key_paths
         parameter = self.class.parameter_set.find(:gpg_user_key_paths)
         key_paths = parameter.get(self)
@@ -48,6 +46,8 @@ module RakeGitCrypt
 
         resolve_key_paths(key_paths)
       end
+
+      private
 
       def resolve_key_paths(paths)
         paths.inject([]) do |acc, key_path|
@@ -73,7 +73,7 @@ module RakeGitCrypt
 
       def ensure_users_provided
         if gpg_user_details_present?(:key_path) ||
-          gpg_user_details_present?(:id)
+           gpg_user_details_present?(:id)
           return
         end
 

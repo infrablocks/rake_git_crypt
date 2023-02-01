@@ -5,6 +5,7 @@ require 'spec_helper'
 describe RakeGitCrypt::Tasks::AddUsers do
   include_context 'rake'
 
+  # rubocop:disable Metrics/MethodLength
   def define_task(opts = {}, &block)
     opts = {
       namespace: :git_crypt,
@@ -24,6 +25,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       subject.define(opts, &block)
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   it 'adds an add_users task in the namespace in which it is created' do
     define_task
