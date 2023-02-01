@@ -1,11 +1,6 @@
 TODO
 ====
 
-* Finish AddUser task
-  * Optionally commit?
-
-* Add AddUsers task
-  * Optionally commit?
 * Add RemoveUser task
   * Remove user for key name
   * By ID or by key path
@@ -15,10 +10,7 @@ TODO
 
 * Add Install task
   * Optionally provision secrets
-* Add Uninstall task
-  * Handle already unlocked
 
 * Add Reinstall task
   * Execute uninstall task
   * Execute install task
-  * Regenerate secrets?
