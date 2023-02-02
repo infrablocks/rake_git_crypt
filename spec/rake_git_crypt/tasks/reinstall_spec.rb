@@ -55,6 +55,19 @@ describe RakeGitCrypt::Tasks::Reinstall do
         .to(have_received(:invoke))
     end
 
+    it 're-enables the default uninstall task' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:uninstall')
+      stub_task('git_crypt:install')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:uninstall'])
+        .to(have_received(:reenable))
+    end
+
     it 'installs git-crypt using the default install task' do
       define_task
 
@@ -66,6 +79,38 @@ describe RakeGitCrypt::Tasks::Reinstall do
 
       expect(Rake::Task['git_crypt:install'])
         .to(have_received(:invoke))
+    end
+
+    it 're-enables the default install task' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:uninstall')
+      stub_task('git_crypt:install')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:install'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes tasks in the correct order' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:uninstall')
+      stub_task('git_crypt:install')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:uninstall'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:uninstall'])
+        .to(have_received(:reenable).ordered)
+      expect(Rake::Task['git_crypt:install'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:install'])
+        .to(have_received(:reenable).ordered)
     end
   end
 
@@ -84,6 +129,41 @@ describe RakeGitCrypt::Tasks::Reinstall do
 
       expect(Rake::Task['git_crypt:remove'])
         .to(have_received(:invoke))
+    end
+
+    it 're-enables the specified uninstall task' do
+      define_task(
+        uninstall_task_name: :remove,
+        additional_namespaced_tasks: %i[install remove]
+      )
+
+      stub_output
+      stub_task('git_crypt:remove')
+      stub_task('git_crypt:install')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:remove'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified uninstall task in the ' \
+       'correct order' do
+      define_task(
+        uninstall_task_name: :remove,
+        additional_namespaced_tasks: %i[install remove]
+      )
+
+      stub_output
+      stub_task('git_crypt:remove')
+      stub_task('git_crypt:install')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:remove'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:remove'])
+        .to(have_received(:reenable).ordered)
     end
   end
 
@@ -121,6 +201,53 @@ describe RakeGitCrypt::Tasks::Reinstall do
         expect(Rake::Task["git_crypt:#{install_task_name}"])
           .to(have_received(:invoke))
       end
+    end
+
+    it 're-enables the specified install tasks' do
+      install_task_names = %i[install_user install_admin]
+
+      define_task(
+        install_task_names: install_task_names,
+        additional_namespaced_tasks: %i[install_user install_admin uninstall]
+      )
+
+      stub_output
+      stub_task('git_crypt:uninstall')
+      stub_task('git_crypt:install_user')
+      stub_task('git_crypt:install_admin')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      install_task_names.each do |install_task_name|
+        expect(Rake::Task["git_crypt:#{install_task_name}"])
+          .to(have_received(:reenable))
+      end
+    end
+
+    it 'invokes and re-enables the specified install tasks in the ' \
+       'correct order' do
+      install_task_names = %i[install_user install_admin]
+
+      define_task(
+        install_task_names: install_task_names,
+        additional_namespaced_tasks: %i[install_user install_admin uninstall]
+      )
+
+      stub_output
+      stub_task('git_crypt:uninstall')
+      stub_task('git_crypt:install_user')
+      stub_task('git_crypt:install_admin')
+
+      Rake::Task['git_crypt:reinstall'].invoke
+
+      expect(Rake::Task['git_crypt:install_user'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:install_user'])
+        .to(have_received(:reenable).ordered)
+      expect(Rake::Task['git_crypt:install_admin'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:install_admin'])
+        .to(have_received(:reenable).ordered)
     end
   end
 

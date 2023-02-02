@@ -99,7 +99,7 @@ module RakeGitCrypt
       def maybe_commit(task, args)
         return unless commit_task_name
 
-        invoke_task_with_name(
+        invoke_and_reenable_task_with_name(
           task, commit_task_name,
           [commit_message(task), *args]
         )

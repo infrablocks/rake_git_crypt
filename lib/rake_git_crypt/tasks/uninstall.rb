@@ -31,7 +31,7 @@ module RakeGitCrypt
       private
 
       def lock_git_crypt(task, args)
-        invoke_task_with_name(task, lock_task_name, args)
+        invoke_and_reenable_task_with_name(task, lock_task_name, args)
       end
 
       def delete_git_crypt_directories
@@ -42,13 +42,13 @@ module RakeGitCrypt
       def maybe_delete_secrets(task, args)
         return unless delete_secrets_task_name
 
-        invoke_task_with_name(task, delete_secrets_task_name, args)
+        invoke_and_reenable_task_with_name(task, delete_secrets_task_name, args)
       end
 
       def maybe_commit(task, args)
         return unless commit_task_name
 
-        invoke_task_with_name(
+        invoke_and_reenable_task_with_name(
           task, commit_task_name,
           [commit_message(task), *args]
         )

@@ -55,6 +55,34 @@ describe RakeGitCrypt::Tasks::Uninstall do
         .to(have_received(:invoke))
     end
 
+    it 're-enables the default lock task' do
+      define_task
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git_crypt:lock'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the default lock task in the correct order' do
+      define_task
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git_crypt:lock'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:lock'])
+        .to(have_received(:reenable).ordered)
+    end
+
     it 'deletes the .git-crypt directory' do
       define_task
 
@@ -119,6 +147,40 @@ describe RakeGitCrypt::Tasks::Uninstall do
       expect(Rake::Task['git_crypt:lock_all'])
         .to(have_received(:invoke))
     end
+
+    it 're-enables the specified lock task' do
+      define_task(
+        lock_task_name: :lock_all,
+        additional_namespaced_tasks: %i[lock_all]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock_all')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git_crypt:lock_all'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified lock task in the correct order' do
+      define_task(
+        lock_task_name: :lock_all,
+        additional_namespaced_tasks: %i[lock_all]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock_all')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git_crypt:lock_all'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:lock_all'])
+        .to(have_received(:reenable).ordered)
+    end
   end
 
   describe 'when lock_task_name provided and task not defined' do
@@ -154,6 +216,43 @@ describe RakeGitCrypt::Tasks::Uninstall do
       expect(Rake::Task['secrets:delete'])
         .to(have_received(:invoke))
     end
+
+    it 're-enables the specified delete secrets task' do
+      define_task(
+        delete_secrets_task_name: :'secrets:delete',
+        additional_top_level_tasks: %i[secrets:delete]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('secrets:delete')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['secrets:delete'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified delete secrets task in the ' \
+       'correct order' do
+      define_task(
+        delete_secrets_task_name: :'secrets:delete',
+        additional_top_level_tasks: %i[secrets:delete]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('secrets:delete')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['secrets:delete'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['secrets:delete'])
+        .to(have_received(:reenable).ordered)
+    end
   end
 
   describe 'when delete_secrets_task_name provided and task not defined' do
@@ -188,6 +287,43 @@ describe RakeGitCrypt::Tasks::Uninstall do
       expect(Rake::Task['git:commit'])
         .to(have_received(:invoke)
               .with('Uninstalling git-crypt.'))
+    end
+
+    it 're-enables the specified commit task' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified commit task in the ' \
+       'correct order' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_rm_rf
+      stub_task('git_crypt:lock')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:uninstall'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable).ordered)
     end
 
     it 'uses the specified commit message when provided' do

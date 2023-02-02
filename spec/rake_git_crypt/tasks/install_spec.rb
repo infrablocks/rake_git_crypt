@@ -63,6 +63,34 @@ describe RakeGitCrypt::Tasks::Install do
         .to(have_received(:invoke))
     end
 
+    it 're-enables the default init task' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:init'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the default init task in the correct order' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:init'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:init'])
+        .to(have_received(:reenable).ordered)
+    end
+
     it 'adds users to git-crypt using the default add users task' do
       define_task
 
@@ -74,6 +102,35 @@ describe RakeGitCrypt::Tasks::Install do
 
       expect(Rake::Task['git_crypt:add_users'])
         .to(have_received(:invoke))
+    end
+
+    it 're-enables the default add users task' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:add_users'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the default add users task in the ' \
+       'correct order' do
+      define_task
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:add_users'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:add_users'])
+        .to(have_received(:reenable).ordered)
     end
 
     it 'inits before adding users' do
@@ -108,6 +165,40 @@ describe RakeGitCrypt::Tasks::Install do
       expect(Rake::Task['git_crypt:init_admin_key'])
         .to(have_received(:invoke))
     end
+
+    it 're-enables the specified init task' do
+      define_task(
+        init_task_name: :init_admin_key,
+        additional_namespaced_tasks: %i[init_admin_key add_users]
+      )
+
+      stub_output
+      stub_task('git_crypt:init_admin_key')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:init_admin_key'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified init task in the correct order' do
+      define_task(
+        init_task_name: :init_admin_key,
+        additional_namespaced_tasks: %i[init_admin_key add_users]
+      )
+
+      stub_output
+      stub_task('git_crypt:init_admin_key')
+      stub_task('git_crypt:add_users')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:init_admin_key'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:init_admin_key'])
+        .to(have_received(:reenable).ordered)
+    end
   end
 
   describe 'when init_task_name provided and task not defined' do
@@ -139,6 +230,41 @@ describe RakeGitCrypt::Tasks::Install do
 
       expect(Rake::Task['git_crypt:add_users_for_admin_key'])
         .to(have_received(:invoke))
+    end
+
+    it 're-enables the specified add users task' do
+      define_task(
+        add_users_task_name: :add_users_for_admin_key,
+        additional_namespaced_tasks: %i[add_users_for_admin_key init]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users_for_admin_key')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:add_users_for_admin_key'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified add users task in the ' \
+       'correct order' do
+      define_task(
+        add_users_task_name: :add_users_for_admin_key,
+        additional_namespaced_tasks: %i[add_users_for_admin_key init]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users_for_admin_key')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:add_users_for_admin_key'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:add_users_for_admin_key'])
+        .to(have_received(:reenable).ordered)
     end
   end
 
@@ -173,6 +299,43 @@ describe RakeGitCrypt::Tasks::Install do
       expect(Rake::Task['git:commit'])
         .to(have_received(:invoke)
               .with('Installing git-crypt.'))
+    end
+
+    it 're-enables the specified commit task' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified commit task in the ' \
+       'correct order' do
+      define_task(
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable).ordered)
     end
 
     it 'uses the specified commit message template when provided' do

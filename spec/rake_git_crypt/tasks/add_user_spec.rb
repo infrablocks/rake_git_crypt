@@ -9,7 +9,7 @@ describe RakeGitCrypt::Tasks::AddUser do
   def define_task(opts = {}, &block)
     opts = {
       namespace: :git_crypt,
-      additional_namespaced_tasks: %i[add_user_by_id add_user_by_key_path],
+      additional_namespaced_tasks: %i[],
       additional_top_level_tasks: %i[]
     }.merge(opts)
 
@@ -231,6 +231,46 @@ describe RakeGitCrypt::Tasks::AddUser do
         expect(Rake::Task['git:commit'])
           .to(have_received(:invoke)
                 .with("Adding git-crypt GPG user with ID: '#{gpg_user_id}'."))
+      end
+
+      it 're-enables the commit task' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:reenable))
+      end
+
+      it 'invokes and re-enables the commit task in the correct order' do
+        gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
+
+        define_task(
+          gpg_user_id: gpg_user_id,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke).ordered)
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:reenable).ordered)
       end
 
       it 'uses the specified commit message template when provided' do
@@ -628,6 +668,48 @@ describe RakeGitCrypt::Tasks::AddUser do
           .to(have_received(:invoke)
                 .with('Adding git-crypt GPG user with key path: ' \
                       "'#{gpg_user_key_path}'."))
+      end
+
+      it 're-enables the commit task' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:reenable))
+      end
+
+      it 'invokes and re-enables the commit task in the correct order' do
+        gpg_user_key_path = 'path/to/gpg.public'
+
+        define_task(
+          gpg_user_key_path: gpg_user_key_path,
+          commit_task_name: :'git:commit',
+          additional_top_level_tasks: %i[git:commit]
+        )
+
+        stub_output
+        stub_gpg_import
+        stub_git_crypt_add_gpg_user
+        stub_task('git:commit')
+
+        Rake::Task['git_crypt:add_user'].invoke
+
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:invoke).ordered)
+        expect(Rake::Task['git:commit'])
+          .to(have_received(:reenable).ordered)
       end
 
       it 'uses the specified commit message template when provided' do

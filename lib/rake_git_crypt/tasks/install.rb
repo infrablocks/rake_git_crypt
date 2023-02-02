@@ -30,17 +30,17 @@ module RakeGitCrypt
       private
 
       def init_git_crypt(task, args)
-        invoke_task_with_name(task, init_task_name, args)
+        invoke_and_reenable_task_with_name(task, init_task_name, args)
       end
 
       def add_users_to_git_crypt(task, args)
-        invoke_task_with_name(task, add_users_task_name, args)
+        invoke_and_reenable_task_with_name(task, add_users_task_name, args)
       end
 
       def maybe_commit(task, args)
         return unless commit_task_name
 
-        invoke_task_with_name(
+        invoke_and_reenable_task_with_name(
           task, commit_task_name,
           [commit_message(task), *args]
         )

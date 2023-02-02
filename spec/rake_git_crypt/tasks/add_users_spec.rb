@@ -439,6 +439,52 @@ describe RakeGitCrypt::Tasks::AddUsers do
               .with('Adding users to git-crypt.'))
     end
 
+    it 're-enables the commit task' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:add_users'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the commit task in the correct order' do
+      gpg_user_key_paths = %w[
+        path/to/key.gpg
+      ]
+
+      define_task(
+        gpg_user_key_paths: gpg_user_key_paths,
+        commit_task_name: :'git:commit',
+        additional_top_level_tasks: %i[git:commit]
+      )
+
+      stub_output
+      stub_file('path/to/key.gpg')
+      stub_task('git_crypt:add_user_by_key_path')
+      stub_task('git:commit')
+
+      Rake::Task['git_crypt:add_users'].invoke
+
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git:commit'])
+        .to(have_received(:reenable).ordered)
+    end
+
     it 'uses the specified commit message template when provided' do
       gpg_user_key_paths = %w[
         path/to/key.gpg

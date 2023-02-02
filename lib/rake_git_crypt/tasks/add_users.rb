@@ -129,10 +129,10 @@ module RakeGitCrypt
 
         puts "Adding git-crypt users by type #{user_type}..."
         add_user_task_name = task.send(:"add_user_by_#{user_type}_task_name")
-        add_user_task = task.application[add_user_task_name, task.scope]
         send(:"gpg_user_#{user_type}s").each do |detail|
-          add_user_task.invoke(detail, *args)
-          add_user_task.reenable
+          invoke_and_reenable_task_with_name(
+            task, add_user_task_name, [detail, *args]
+          )
         end
       end
 
@@ -164,7 +164,7 @@ module RakeGitCrypt
       def maybe_commit(task, args)
         return unless commit_task_name
 
-        invoke_task_with_name(
+        invoke_and_reenable_task_with_name(
           task, commit_task_name,
           [commit_message(task), *args]
         )

@@ -31,12 +31,12 @@ module RakeGitCrypt
       end
 
       def uninstall_git_crypt(task, args)
-        invoke_task_with_name(task, uninstall_task_name, args)
+        invoke_and_reenable_task_with_name(task, uninstall_task_name, args)
       end
 
       def install_git_crypt(task, args)
         install_task_names.each do |install_task_name|
-          invoke_task_with_name(task, install_task_name, args)
+          invoke_and_reenable_task_with_name(task, install_task_name, args)
         end
       end
     end
