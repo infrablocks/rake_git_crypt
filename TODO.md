@@ -10,7 +10,3 @@ TODO
 
 * Add Install task
   * Optionally provision secrets
-
-* Add Reinstall task
-  * Execute uninstall task
-  * Execute install task
