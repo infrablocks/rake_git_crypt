@@ -282,6 +282,115 @@ describe RakeGitCrypt::Tasks::Install do
     end
   end
 
+  describe 'when provision_secrets_task_name provided and task is defined' do
+    it 'provisions secrets using the specified task' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+        additional_top_level_tasks: %i[secrets:provision]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('secrets:provision')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:invoke))
+    end
+
+    it 're-enables the specified provision secrets task' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+        additional_top_level_tasks: %i[secrets:provision]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('secrets:provision')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:reenable))
+    end
+
+    it 'invokes and re-enables the specified provision secrets task in the ' \
+       'correct order' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+        additional_top_level_tasks: %i[secrets:provision]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('secrets:provision')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:reenable).ordered)
+    end
+
+    it 'invokes the specified provision secrets task before adding users' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+        additional_top_level_tasks: %i[secrets:provision]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('secrets:provision')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['git_crypt:add_users'])
+        .to(have_received(:invoke).ordered)
+    end
+
+    it 'invokes the specified provision secrets task after initing git-crypt' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+        additional_top_level_tasks: %i[secrets:provision]
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+      stub_task('secrets:provision')
+
+      Rake::Task['git_crypt:install'].invoke
+
+      expect(Rake::Task['git_crypt:init'])
+        .to(have_received(:invoke).ordered)
+      expect(Rake::Task['secrets:provision'])
+        .to(have_received(:invoke).ordered)
+    end
+  end
+
+  describe 'when provision_secrets_task_name provided and task not defined' do
+    it 'raises an error' do
+      define_task(
+        provision_secrets_task_name: :'secrets:provision',
+      )
+
+      stub_output
+      stub_task('git_crypt:init')
+      stub_task('git_crypt:add_users')
+
+      expect { Rake::Task['git_crypt:install'].invoke }
+        .to(raise_error(RakeFactory::DependencyTaskMissing))
+    end
+  end
+
   describe 'when commit_task_name provided and task is defined' do
     it 'commits with an appropriate message by default' do
       define_task(

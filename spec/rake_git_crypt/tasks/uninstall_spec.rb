@@ -187,78 +187,78 @@ describe RakeGitCrypt::Tasks::Uninstall do
     it 'raises an error' do
       define_task(
         lock_task_name: :lock_admin_key,
-        additional_top_level_tasks: %i[secrets:delete]
+        additional_top_level_tasks: %i[secrets:destroy]
       )
 
       stub_output
       stub_rm_rf
-      stub_task('secrets:delete')
+      stub_task('secrets:destroy')
 
       expect { Rake::Task['git_crypt:uninstall'].invoke }
         .to(raise_error(RakeFactory::DependencyTaskMissing))
     end
   end
 
-  describe 'when delete_secrets_task_name provided and task is defined' do
+  describe 'when destroy_secrets_task_name provided and task is defined' do
     it 'deletes secrets using the specified task' do
       define_task(
-        delete_secrets_task_name: :'secrets:delete',
-        additional_top_level_tasks: %i[secrets:delete]
+        destroy_secrets_task_name: :'secrets:destroy',
+        additional_top_level_tasks: %i[secrets:destroy]
       )
 
       stub_output
       stub_rm_rf
       stub_task('git_crypt:lock')
-      stub_task('secrets:delete')
+      stub_task('secrets:destroy')
 
       Rake::Task['git_crypt:uninstall'].invoke
 
-      expect(Rake::Task['secrets:delete'])
+      expect(Rake::Task['secrets:destroy'])
         .to(have_received(:invoke))
     end
 
     it 're-enables the specified delete secrets task' do
       define_task(
-        delete_secrets_task_name: :'secrets:delete',
-        additional_top_level_tasks: %i[secrets:delete]
+        destroy_secrets_task_name: :'secrets:destroy',
+        additional_top_level_tasks: %i[secrets:destroy]
       )
 
       stub_output
       stub_rm_rf
       stub_task('git_crypt:lock')
-      stub_task('secrets:delete')
+      stub_task('secrets:destroy')
 
       Rake::Task['git_crypt:uninstall'].invoke
 
-      expect(Rake::Task['secrets:delete'])
+      expect(Rake::Task['secrets:destroy'])
         .to(have_received(:reenable))
     end
 
     it 'invokes and re-enables the specified delete secrets task in the ' \
        'correct order' do
       define_task(
-        delete_secrets_task_name: :'secrets:delete',
-        additional_top_level_tasks: %i[secrets:delete]
+        destroy_secrets_task_name: :'secrets:destroy',
+        additional_top_level_tasks: %i[secrets:destroy]
       )
 
       stub_output
       stub_rm_rf
       stub_task('git_crypt:lock')
-      stub_task('secrets:delete')
+      stub_task('secrets:destroy')
 
       Rake::Task['git_crypt:uninstall'].invoke
 
-      expect(Rake::Task['secrets:delete'])
+      expect(Rake::Task['secrets:destroy'])
         .to(have_received(:invoke).ordered)
-      expect(Rake::Task['secrets:delete'])
+      expect(Rake::Task['secrets:destroy'])
         .to(have_received(:reenable).ordered)
     end
   end
 
-  describe 'when delete_secrets_task_name provided and task not defined' do
+  describe 'when destroy_secrets_task_name provided and task not defined' do
     it 'raises an error' do
       define_task(
-        delete_secrets_task_name: :'secrets:delete'
+        destroy_secrets_task_name: :'secrets:destroy'
       )
 
       stub_output
@@ -347,16 +347,16 @@ describe RakeGitCrypt::Tasks::Uninstall do
 
     it 'calls commit after uninstalling git crypt' do
       define_task(
-        delete_secrets_task_name: :'secrets:delete',
+        destroy_secrets_task_name: :'secrets:destroy',
         commit_task_name: :'git:commit',
         commit_message_template: 'Removing git-crypt.',
-        additional_top_level_tasks: %i[git:commit secrets:delete]
+        additional_top_level_tasks: %i[git:commit secrets:destroy]
       )
 
       stub_output
       stub_rm_rf
       stub_task('git_crypt:lock')
-      stub_task('secrets:delete')
+      stub_task('secrets:destroy')
       stub_task('git:commit')
 
       Rake::Task['git_crypt:uninstall'].invoke
@@ -369,7 +369,7 @@ describe RakeGitCrypt::Tasks::Uninstall do
       expect(FileUtils)
         .to(have_received(:rm_rf)
               .with('.git/git-crypt').ordered)
-      expect(Rake::Task['secrets:delete'])
+      expect(Rake::Task['secrets:destroy'])
         .to(have_received(:invoke).ordered)
       expect(Rake::Task['git:commit'])
         .to(have_received(:invoke).ordered)

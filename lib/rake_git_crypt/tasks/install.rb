@@ -18,11 +18,13 @@ module RakeGitCrypt
 
       parameter(:init_task_name, default: :init)
       parameter(:add_users_task_name, default: :add_users)
+      parameter(:provision_secrets_task_name)
       parameter(:commit_task_name)
 
       action do |task, args|
         puts('Installing git-crypt...')
         init_git_crypt(task, args)
+        maybe_provision_secrets(task, args)
         add_users_to_git_crypt(task, args)
         maybe_commit(task, args)
       end
@@ -35,6 +37,14 @@ module RakeGitCrypt
 
       def add_users_to_git_crypt(task, args)
         invoke_and_reenable_task_with_name(task, add_users_task_name, args)
+      end
+
+      def maybe_provision_secrets(task, args)
+        return unless provision_secrets_task_name
+
+        invoke_and_reenable_task_with_name(
+          task, provision_secrets_task_name, args
+        )
       end
 
       def maybe_commit(task, args)
