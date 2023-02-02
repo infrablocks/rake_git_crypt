@@ -42,7 +42,8 @@ module RakeGitCrypt
       def maybe_delete_secrets(task, args)
         return unless destroy_secrets_task_name
 
-        invoke_and_reenable_task_with_name(task, destroy_secrets_task_name, args)
+        invoke_and_reenable_task_with_name(task, destroy_secrets_task_name,
+                                           args)
       end
 
       def maybe_commit(task, args)

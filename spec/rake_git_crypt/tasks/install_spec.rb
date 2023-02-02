@@ -379,7 +379,7 @@ describe RakeGitCrypt::Tasks::Install do
   describe 'when provision_secrets_task_name provided and task not defined' do
     it 'raises an error' do
       define_task(
-        provision_secrets_task_name: :'secrets:provision',
+        provision_secrets_task_name: :'secrets:provision'
       )
 
       stub_output
