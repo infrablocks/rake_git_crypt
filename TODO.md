@@ -7,5 +7,3 @@ TODO
   * Delete key?
   * Would need to uninstall and reinstall git-crypt in the process
   * Would need to rotate all secrets in the process
-
-* Add task set

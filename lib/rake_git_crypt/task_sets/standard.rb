@@ -145,7 +145,7 @@ module RakeGitCrypt
                ts.add_user_by_id_commit_task_name
              end,
              argument_names: [:gpg_user_id]
-           }) do |t, args|
+           }) do |_, t, args|
         t.gpg_user_id = args.gpg_user_id
       end
       task(Tasks::AddUser,
@@ -160,7 +160,7 @@ module RakeGitCrypt
                ts.add_user_by_key_path_commit_task_name
              end,
              argument_names: [:gpg_user_key_path]
-           }) do |t, args|
+           }) do |_, t, args|
         t.gpg_user_key_path = args.gpg_user_key_path
       end
     end
