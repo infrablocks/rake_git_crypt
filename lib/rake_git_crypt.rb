@@ -5,7 +5,7 @@ require 'rake_git_crypt/task_sets'
 require 'rake_git_crypt/version'
 
 module RakeGitCrypt
-  def self.define_init_task(opts = {}, &block)
-    RakeGitCrypt::Tasks::Init.define(opts, &block)
+  def self.define_standard_tasks(opts = {}, &block)
+    RakeGitCrypt::TaskSets::Standard.define(opts, &block)
   end
 end
