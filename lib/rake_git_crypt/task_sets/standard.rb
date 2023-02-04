@@ -4,6 +4,7 @@ require 'rake_factory'
 
 module RakeGitCrypt
   module TaskSets
+    # rubocop:disable Metrics/ClassLength
     class Standard < RakeFactory::TaskSet
       prepend RakeFactory::Namespaceable
 
@@ -163,5 +164,6 @@ module RakeGitCrypt
         t.gpg_user_key_path = args.gpg_user_key_path
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end
