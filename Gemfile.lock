@@ -4,7 +4,7 @@ PATH
     rake_git_crypt (0.1.0.pre.28)
       colored2 (~> 3.1)
       rake_factory (= 0.32.0.pre.2)
-      ruby_git_crypt (= 0.1.0.pre.2)
+      ruby_git_crypt (= 0.1.0.pre.3)
       ruby_gpg2 (~> 0.6)
 
 GEM
@@ -132,7 +132,7 @@ GEM
       rubocop-factory_bot (~> 2.22)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    ruby_git_crypt (0.1.0.pre.2)
+    ruby_git_crypt (0.1.0.pre.3)
       immutable-struct (~> 2.4)
       lino (~> 3.0)
     ruby_gpg2 (0.10.0)
