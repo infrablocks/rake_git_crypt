@@ -38,7 +38,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'colored2', '~> 3.1'
   spec.add_dependency 'rake_factory', '0.32.0.pre.2'
-  spec.add_dependency 'ruby_git_crypt', '0.1.0.pre.4'
+  spec.add_dependency 'ruby_git_crypt', '0.1.0.pre.5'
   spec.add_dependency 'ruby_gpg2', '~> 0.6'
 
   spec.metadata['rubygems_mfa_required'] = 'false'
