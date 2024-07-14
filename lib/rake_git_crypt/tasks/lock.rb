@@ -17,9 +17,9 @@ module RakeGitCrypt
         puts('Locking git-crypt...')
         begin
           RubyGitCrypt.lock(
-            key_name: key_name,
-            force: force,
-            all: all
+            key_name:,
+            force:,
+            all:
           )
           puts('Locked.')
         rescue RubyGitCrypt::Errors::ExecutionError

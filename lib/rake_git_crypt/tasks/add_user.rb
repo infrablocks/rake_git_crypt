@@ -87,8 +87,8 @@ module RakeGitCrypt
       def add_gpg_user(gpg_home_directory, gpg_user_id, auto_trust: false)
         RubyGitCrypt.add_gpg_user(
           {
-            gpg_user_id: gpg_user_id,
-            key_name: key_name,
+            gpg_user_id:,
+            key_name:,
             no_commit: !allow_git_crypt_commit,
             trusted: auto_trust || allow_untrusted_keys
           },
@@ -109,7 +109,7 @@ module RakeGitCrypt
         Template.new(commit_message_template)
                 .render(type: gpg_user_id ? 'ID' : 'key path',
                         value: gpg_user_id || gpg_user_key_path,
-                        task: task)
+                        task:)
       end
 
       def git_crypt_environment(gpg_home_directory)

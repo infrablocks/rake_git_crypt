@@ -58,7 +58,7 @@ module RakeGitCrypt
 
       def commit_message(task)
         Template.new(commit_message_template)
-                .render(task: task)
+                .render(task:)
       end
     end
   end

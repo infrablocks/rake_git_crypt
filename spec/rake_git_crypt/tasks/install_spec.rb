@@ -6,7 +6,7 @@ describe RakeGitCrypt::Tasks::Install do
   include_context 'rake'
 
   # rubocop:disable Metrics/MethodLength
-  def define_task(opts = {}, &block)
+  def define_task(opts = {}, &)
     opts = {
       namespace: :git_crypt,
       additional_namespaced_tasks: %i[init add_users],
@@ -22,7 +22,7 @@ describe RakeGitCrypt::Tasks::Install do
         task t
       end
 
-      subject.define(opts, &block)
+      subject.define(opts, &)
     end
   end
   # rubocop:enable Metrics/MethodLength

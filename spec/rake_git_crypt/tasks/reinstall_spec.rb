@@ -6,7 +6,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
   include_context 'rake'
 
   # rubocop:disable Metrics/MethodLength
-  def define_task(opts = {}, &block)
+  def define_task(opts = {}, &)
     opts = {
       namespace: :git_crypt,
       additional_namespaced_tasks: %i[install uninstall],
@@ -22,7 +22,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
         task t
       end
 
-      subject.define(opts, &block)
+      subject.define(opts, &)
     end
   end
   # rubocop:enable Metrics/MethodLength
@@ -186,7 +186,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_user install_admin]
 
       define_task(
-        install_task_names: install_task_names,
+        install_task_names:,
         additional_namespaced_tasks: %i[install_user install_admin uninstall]
       )
 
@@ -207,7 +207,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_user install_admin]
 
       define_task(
-        install_task_names: install_task_names,
+        install_task_names:,
         additional_namespaced_tasks: %i[install_user install_admin uninstall]
       )
 
@@ -229,7 +229,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_user install_admin]
 
       define_task(
-        install_task_names: install_task_names,
+        install_task_names:,
         additional_namespaced_tasks: %i[install_user install_admin uninstall]
       )
 
@@ -256,7 +256,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_admin install_user]
 
       define_task(
-        install_task_names: install_task_names,
+        install_task_names:,
         additional_namespaced_tasks: %i[install_admin uninstall]
       )
 
@@ -272,7 +272,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_admin install_user]
 
       define_task(
-        install_task_names: install_task_names,
+        install_task_names:,
         additional_namespaced_tasks: %i[install_admin uninstall]
       )
 
@@ -296,7 +296,7 @@ describe RakeGitCrypt::Tasks::Reinstall do
       install_task_names = %i[install_admin install_user]
 
       define_task(
-        install_task_names: install_task_names
+        install_task_names:
       )
 
       stub_output

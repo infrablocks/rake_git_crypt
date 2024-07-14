@@ -5,11 +5,11 @@ require 'spec_helper'
 describe RakeGitCrypt::Tasks::Lock do
   include_context 'rake'
 
-  def define_task(opts = {}, &block)
+  def define_task(opts = {}, &)
     opts = { namespace: :git_crypt }.merge(opts)
 
     namespace opts[:namespace] do
-      subject.define(opts, &block)
+      subject.define(opts, &)
     end
   end
 

@@ -7,9 +7,9 @@ module RakeGitCrypt
       @home_directory = home_directory
     end
 
-    def with_resolved_directory(&block)
+    def with_resolved_directory(&)
       if @home_directory == :temporary
-        Dir.mktmpdir('home', @work_directory, &block)
+        Dir.mktmpdir('home', @work_directory, &)
       else
         FileUtils.mkdir_p(@home_directory) if @home_directory
         yield @home_directory

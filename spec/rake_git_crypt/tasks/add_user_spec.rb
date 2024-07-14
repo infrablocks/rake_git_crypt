@@ -6,7 +6,7 @@ describe RakeGitCrypt::Tasks::AddUser do
   include_context 'rake'
 
   # rubocop:disable Metrics/MethodLength
-  def define_task(opts = {}, &block)
+  def define_task(opts = {}, &)
     opts = {
       namespace: :git_crypt,
       additional_namespaced_tasks: %i[],
@@ -22,7 +22,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         task t
       end
 
-      subject.define(opts, &block)
+      subject.define(opts, &)
     end
   end
   # rubocop:enable Metrics/MethodLength
@@ -217,7 +217,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
 
         define_task(
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -237,7 +237,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
 
         define_task(
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -256,7 +256,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
 
         define_task(
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -278,7 +278,7 @@ describe RakeGitCrypt::Tasks::AddUser do
 
         define_task(
           key_name: 'admin',
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit',
           commit_message_template:
             "Adding user for key: '<%= @task.key_name %>'.",
@@ -300,7 +300,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
 
         define_task(
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -323,7 +323,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_id = '41D2606F66C3FF28874362B61A16916844CE9D82'
 
         define_task(
-          gpg_user_id: gpg_user_id,
+          gpg_user_id:,
           commit_task_name: :'git:commit'
         )
 
@@ -652,7 +652,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_key_path = 'path/to/gpg.public'
 
         define_task(
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -674,7 +674,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_key_path = 'path/to/gpg.public'
 
         define_task(
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -694,7 +694,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_key_path = 'path/to/gpg.public'
 
         define_task(
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -717,7 +717,7 @@ describe RakeGitCrypt::Tasks::AddUser do
 
         define_task(
           key_name: 'admin',
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit',
           commit_message_template:
             "Adding user for key: '<%= @task.key_name %>'.",
@@ -740,7 +740,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_key_path = 'path/to/gpg.public'
 
         define_task(
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit',
           additional_top_level_tasks: %i[git:commit]
         )
@@ -764,7 +764,7 @@ describe RakeGitCrypt::Tasks::AddUser do
         gpg_user_key_path = 'path/to/gpg.public'
 
         define_task(
-          gpg_user_key_path: gpg_user_key_path,
+          gpg_user_key_path:,
           commit_task_name: :'git:commit'
         )
 

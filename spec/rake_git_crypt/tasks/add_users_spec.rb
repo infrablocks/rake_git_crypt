@@ -6,7 +6,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
   include_context 'rake'
 
   # rubocop:disable Metrics/MethodLength
-  def define_task(opts = {}, &block)
+  def define_task(opts = {}, &)
     opts = {
       namespace: :git_crypt,
       additional_namespaced_tasks: %i[add_user_by_id add_user_by_key_path],
@@ -22,7 +22,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
         task t
       end
 
-      subject.define(opts, &block)
+      subject.define(opts, &)
     end
   end
   # rubocop:enable Metrics/MethodLength
@@ -71,7 +71,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
           path/to/key2.gpg
         ]
 
-        define_task(gpg_user_key_paths: gpg_user_key_paths)
+        define_task(gpg_user_key_paths:)
 
         stub_output
         stub_file('path/to/key1.gpg')
@@ -101,7 +101,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
 
         define_task(
           additional_namespaced_tasks: %i[add_by_id add_by_key],
-          gpg_user_key_paths: gpg_user_key_paths,
+          gpg_user_key_paths:,
           add_user_by_key_path_task_name: :add_by_key,
           add_user_by_id_task_name: :add_by_id
         )
@@ -134,7 +134,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
           path/to/keys2
         ]
 
-        define_task(gpg_user_key_paths: gpg_user_key_paths)
+        define_task(gpg_user_key_paths:)
 
         stub_output
         stub_file('path/to/keys1/key1.gpg')
@@ -177,7 +177,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
 
         define_task(
           additional_namespaced_tasks: %i[add_by_id add_by_key],
-          gpg_user_key_paths: gpg_user_key_paths,
+          gpg_user_key_paths:,
           add_user_by_key_path_task_name: :add_by_key,
           add_user_by_id_task_name: :add_by_id
         )
@@ -222,7 +222,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         add_user_by_key_path_task_name: nil
       )
 
@@ -243,7 +243,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         add_user_by_key_path_task_name: :missing_task
       )
 
@@ -265,7 +265,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
         D164A61C69E23C0F74475FBE5FFE76AD095FCA07
       ]
 
-      define_task(gpg_user_ids: gpg_user_ids)
+      define_task(gpg_user_ids:)
 
       stub_output
       stub_task('git_crypt:add_user_by_id')
@@ -293,7 +293,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
 
       define_task(
         additional_namespaced_tasks: %i[add_by_id add_by_key],
-        gpg_user_ids: gpg_user_ids,
+        gpg_user_ids:,
         add_user_by_key_path_task_name: :add_by_key,
         add_user_by_id_task_name: :add_by_id
       )
@@ -322,7 +322,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_ids: gpg_user_ids,
+        gpg_user_ids:,
         add_user_by_id_task_name: nil
       )
 
@@ -341,7 +341,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_ids: gpg_user_ids,
+        gpg_user_ids:,
         add_user_by_id_task_name: :missing_task
       )
 
@@ -367,8 +367,8 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_ids: gpg_user_ids,
-        gpg_user_key_paths: gpg_user_key_paths
+        gpg_user_ids:,
+        gpg_user_key_paths:
       )
 
       stub_output
@@ -422,7 +422,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         additional_top_level_tasks: %i[git:commit]
       )
@@ -445,7 +445,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         additional_top_level_tasks: %i[git:commit]
       )
@@ -467,7 +467,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         additional_top_level_tasks: %i[git:commit]
       )
@@ -491,7 +491,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         commit_message_template:
           'Adding git-crypt users: <%= @task.gpg_user_key_paths %>.',
@@ -516,7 +516,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         additional_top_level_tasks: %i[git:commit]
       )
@@ -544,7 +544,7 @@ describe RakeGitCrypt::Tasks::AddUsers do
       ]
 
       define_task(
-        gpg_user_key_paths: gpg_user_key_paths,
+        gpg_user_key_paths:,
         commit_task_name: :'git:commit',
         commit_message: 'Adding git-crypt users.'
       )
