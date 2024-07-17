@@ -3,9 +3,9 @@ PATH
   specs:
     rake_git_crypt (0.1.0.pre.33)
       colored2 (~> 3.1)
-      rake_factory (>= 0.32.0.pre.2)
-      ruby_git_crypt (>= 0.1.0.pre.8)
-      ruby_gpg2 (>= 0.11.0.pre.6)
+      rake_factory (~> 0.33)
+      ruby_git_crypt (~> 0.1)
+      ruby_gpg2 (~> 0.12)
 
 GEM
   remote: https://rubygems.org/
@@ -77,13 +77,13 @@ GEM
       excon (~> 0.72)
       rake_factory (~> 0.23)
       sshkey (~> 2.0)
-    rake_factory (0.32.0.pre.2)
+    rake_factory (0.33.0)
       activesupport (>= 4)
       rake (~> 13.0)
-    rake_git (0.1.0.pre.10)
+    rake_git (0.1.0.pre.11)
       colored2 (~> 3.1)
       git (~> 1.13, >= 1.13.2)
-      rake_factory (= 0.32.0.pre.2)
+      rake_factory (>= 0.32.0.pre.2)
     rake_github (0.13.0)
       colored2 (~> 3.1)
       octokit (>= 4.16, < 9.0)
