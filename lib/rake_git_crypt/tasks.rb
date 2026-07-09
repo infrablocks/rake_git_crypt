@@ -8,6 +8,7 @@ require_relative 'tasks/lock'
 require_relative 'tasks/reinstall'
 require_relative 'tasks/uninstall'
 require_relative 'tasks/unlock'
+require_relative 'tasks/unlock_ci'
 
 module RakeGitCrypt
   module Tasks

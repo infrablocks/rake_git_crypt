@@ -22,6 +22,35 @@ Or install it yourself as:
 
 TODO: Write docs.
 
+### Unlocking git-crypt in CI
+
+The `unlock_ci` task unlocks git-crypt in a CI environment. It decrypts an
+OpenSSL-encrypted CI GPG private key, imports it into GPG and runs
+`git-crypt unlock`. The passphrase is read from an environment variable so
+that it never appears on the process command line.
+
+```ruby
+require 'rake_git_crypt'
+
+RakeGitCrypt::Tasks::UnlockCI.define(
+  encrypted_key_path: '.github/gpg.private.enc',
+  passphrase_env_var_name: 'ENCRYPTION_PASSPHRASE'
+)
+```
+
+Both parameters are optional and default to the values shown above. The task
+is also included in the standard task set, where the same settings can be
+provided via `unlock_ci_encrypted_key_path` and
+`unlock_ci_passphrase_env_var_name`.
+
+The passphrase is expected to be provided as a secret (for example the
+`ENCRYPTION_PASSPHRASE` GitHub Actions or Dependabot secret) and exposed to
+the step that runs the task:
+
+```bash
+ENCRYPTION_PASSPHRASE="..." bundle exec rake unlock_ci
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
