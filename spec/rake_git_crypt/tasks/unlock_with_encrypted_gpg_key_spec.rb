@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RakeGitCrypt::Tasks::UnlockCI do
+describe RakeGitCrypt::Tasks::UnlockWithEncryptedGPGKey do
   include_context 'rake'
 
   def define_task(opts = {}, &)
@@ -18,26 +18,29 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     Lino.reset!
   end
 
-  it 'adds an unlock_ci task in the namespace in which it is created' do
+  it 'adds an unlock_with_encrypted_gpg_key task in the namespace in ' \
+     'which it is created' do
     define_task
 
     expect(Rake.application)
-      .to(have_task_defined('git_crypt:unlock_ci'))
+      .to(have_task_defined('git_crypt:unlock_with_encrypted_gpg_key'))
   end
 
   it 'gives the task a description' do
     define_task
 
-    expect(Rake::Task['git_crypt:unlock_ci'].full_comment)
-      .to(eq('Unlock git-crypt using an encrypted CI GPG key.'))
+    expect(Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].full_comment)
+      .to(eq('Unlock git-crypt using a passphrase-encrypted GPG key.'))
   end
 
-  it 'allows multiple unlock_ci tasks to be declared' do
+  it 'allows multiple unlock_with_encrypted_gpg_key tasks to be declared' do
     define_task(namespace: :git_crypt1)
     define_task(namespace: :git_crypt2)
 
-    expect(Rake.application).to(have_task_defined('git_crypt1:unlock_ci'))
-    expect(Rake.application).to(have_task_defined('git_crypt2:unlock_ci'))
+    expect(Rake.application)
+      .to(have_task_defined('git_crypt1:unlock_with_encrypted_gpg_key'))
+    expect(Rake.application)
+      .to(have_task_defined('git_crypt2:unlock_with_encrypted_gpg_key'))
   end
 
   it 'decrypts the key, imports it and unlocks git-crypt in that order' do
@@ -49,7 +52,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(executor).to(have_received(:execute).ordered)
     expect(RubyGPG2).to(have_received(:import).ordered)
@@ -65,7 +68,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(openssl_arguments(executor))
       .to(start_with(%w[openssl aes-256-cbc -d -md sha1]))
@@ -80,7 +83,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     arguments = openssl_arguments(executor)
     expect(arguments).to(include('-pass', 'env:ENCRYPTION_PASSPHRASE'))
@@ -96,7 +99,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(openssl_arguments(executor))
       .to(include('-in', '.github/gpg.private.enc'))
@@ -111,7 +114,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(openssl_arguments(executor))
       .to(include('-in', '.circleci/gpg.private.enc'))
@@ -126,7 +129,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(openssl_arguments(executor))
       .to(include('-pass', 'env:ENCRYPTION_PASSPHRASE'))
@@ -141,7 +144,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(openssl_arguments(executor))
       .to(include('-pass', 'env:CUSTOM_PASSPHRASE'))
@@ -156,7 +159,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGPG2)
       .to(have_received(:import)
@@ -174,7 +177,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGitCrypt).to(have_received(:unlock))
   end
@@ -189,7 +192,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGPG2)
       .to(have_received(:import)
@@ -207,7 +210,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(Dir)
       .to(have_received(:mktmpdir).with('home', '/custom/work'))
@@ -224,7 +227,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGitCrypt)
       .to(have_received(:unlock)
@@ -244,7 +247,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGPG2)
       .to(have_received(:import)
@@ -261,7 +264,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(FileUtils)
       .to(have_received(:mkdir_p).with('nested/home/directory'))
@@ -278,7 +281,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_gpg_import
     stub_git_crypt_unlock
 
-    Rake::Task['git_crypt:unlock_ci'].invoke
+    Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke
 
     expect(RubyGitCrypt)
       .to(have_received(:unlock)
@@ -294,7 +297,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_encrypted_key
     stub_output
 
-    expect { Rake::Task['git_crypt:unlock_ci'].invoke }
+    expect { Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke }
       .to(raise_error(
             RakeFactory::RequiredParameterUnset,
             /ENCRYPTION_PASSPHRASE.*Dependabot/m
@@ -307,7 +310,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     stub_encrypted_key
     stub_output
 
-    expect { Rake::Task['git_crypt:unlock_ci'].invoke }
+    expect { Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke }
       .to(raise_error(
             RakeFactory::RequiredParameterUnset,
             /ENCRYPTION_PASSPHRASE/
@@ -322,7 +325,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
       .to(receive(:file?).with('.github/gpg.private.enc').and_return(false))
     stub_output
 
-    expect { Rake::Task['git_crypt:unlock_ci'].invoke }
+    expect { Rake::Task['git_crypt:unlock_with_encrypted_gpg_key'].invoke }
       .to(raise_error(%r{\.github/gpg\.private\.enc}))
   end
 
@@ -353,7 +356,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
   def stub_mktmpdir(
     work_directory: '/tmp',
     home_directory: '/tmp/home-00000000',
-    decrypt_directory: '/tmp/git-crypt-ci-00000000'
+    decrypt_directory: '/tmp/git-crypt-unlock-00000000'
   )
     allow(Dir).to(receive(:mktmpdir).and_call_original)
     allow(Dir)
@@ -362,7 +365,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
             .and_yield(home_directory))
     allow(Dir)
       .to(receive(:mktmpdir)
-            .with('git-crypt-ci', work_directory)
+            .with('git-crypt-unlock', work_directory)
             .and_yield(decrypt_directory))
   end
 

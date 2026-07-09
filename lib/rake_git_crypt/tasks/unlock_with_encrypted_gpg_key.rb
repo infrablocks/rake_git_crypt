@@ -10,9 +10,10 @@ require_relative '../home'
 
 module RakeGitCrypt
   module Tasks
-    class UnlockCI < RakeFactory::Task
-      default_name :unlock_ci
-      default_description 'Unlock git-crypt using an encrypted CI GPG key.'
+    class UnlockWithEncryptedGPGKey < RakeFactory::Task
+      default_name :unlock_with_encrypted_gpg_key
+      default_description 'Unlock git-crypt using a passphrase-encrypted ' \
+                          'GPG key.'
 
       parameter :encrypted_key_path, default: '.github/gpg.private.enc'
       parameter :passphrase_env_var_name, default: 'ENCRYPTION_PASSPHRASE'
@@ -23,7 +24,7 @@ module RakeGitCrypt
         ensure_passphrase_present
         ensure_encrypted_key_present
 
-        puts('Unlocking git-crypt using encrypted CI GPG key...')
+        puts('Unlocking git-crypt using passphrase-encrypted GPG key...')
         with_gpg_home_directory do |home_directory|
           with_decrypted_key do |decrypted_key_path|
             import_key(decrypted_key_path, home_directory)
@@ -56,7 +57,7 @@ module RakeGitCrypt
       end
 
       def with_decrypted_key
-        Dir.mktmpdir('git-crypt-ci', gpg_work_directory) do |directory|
+        Dir.mktmpdir('git-crypt-unlock', gpg_work_directory) do |directory|
           decrypted_key_path = File.join(directory, 'gpg.private')
           decrypt_key(decrypted_key_path)
           yield decrypted_key_path
@@ -108,9 +109,9 @@ module RakeGitCrypt
       end
 
       def encrypted_key_missing_message
-        'Encrypted CI GPG private key not found at ' \
+        'Encrypted GPG private key not found at ' \
           "'#{encrypted_key_path}'. Set the encrypted_key_path parameter " \
-          'to the location of the OpenSSL-encrypted CI GPG private key ' \
+          'to the location of the OpenSSL-encrypted GPG private key ' \
           '(repositories part-way through migration may still hold it at ' \
           "'.circleci/gpg.private.enc')."
       end
