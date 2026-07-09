@@ -24,6 +24,11 @@ module RakeGitCrypt
 
       parameter :unlock_key_paths
 
+      parameter :unlock_with_encrypted_gpg_key_encrypted_key_path,
+                default: '.github/gpg.private.enc'
+      parameter :unlock_with_encrypted_gpg_key_passphrase_env_var_name,
+                default: 'ENCRYPTION_PASSPHRASE'
+
       parameter :install_commit_message_template,
                 default: 'Installing git-crypt.'
       parameter :install_commit_task_name
@@ -52,6 +57,8 @@ module RakeGitCrypt
       parameter :init_task_name, default: :init
       parameter :lock_task_name, default: :lock
       parameter :unlock_task_name, default: :unlock
+      parameter :unlock_with_encrypted_gpg_key_task_name,
+                default: :unlock_with_encrypted_gpg_key
       parameter :install_task_name, default: :install
       parameter :uninstall_task_name, default: :uninstall
       parameter :reinstall_task_name, default: :reinstall
@@ -86,6 +93,24 @@ module RakeGitCrypt
              end,
              key_paths: RakeFactory::DynamicValue.new do |ts|
                ts.unlock_key_paths
+             end
+           })
+      task(Tasks::UnlockWithEncryptedGPGKey,
+           {
+             name: RakeFactory::DynamicValue.new do |ts|
+               ts.unlock_with_encrypted_gpg_key_task_name
+             end,
+             encrypted_key_path: RakeFactory::DynamicValue.new do |ts|
+               ts.unlock_with_encrypted_gpg_key_encrypted_key_path
+             end,
+             passphrase_env_var_name: RakeFactory::DynamicValue.new do |ts|
+               ts.unlock_with_encrypted_gpg_key_passphrase_env_var_name
+             end,
+             gpg_home_directory: RakeFactory::DynamicValue.new do |ts|
+               ts.gpg_home_directory
+             end,
+             gpg_work_directory: RakeFactory::DynamicValue.new do |ts|
+               ts.gpg_work_directory
              end
            })
       task(Tasks::Install,

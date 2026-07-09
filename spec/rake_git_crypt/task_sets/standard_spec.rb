@@ -17,6 +17,7 @@ describe RakeGitCrypt::TaskSets::Standard do
               git_crypt:init
               git_crypt:lock
               git_crypt:unlock
+              git_crypt:unlock_with_encrypted_gpg_key
               git_crypt:install
               git_crypt:uninstall
               git_crypt:reinstall
@@ -36,6 +37,7 @@ describe RakeGitCrypt::TaskSets::Standard do
               init
               lock
               unlock
+              unlock_with_encrypted_gpg_key
               install
               uninstall
               reinstall
@@ -192,6 +194,116 @@ describe RakeGitCrypt::TaskSets::Standard do
 
       expect(Rake.application)
         .to(have_task_defined('git_crypt:decrypt'))
+    end
+  end
+
+  describe 'unlock_with_encrypted_gpg_key task' do
+    it 'uses an encrypted key path of .github/gpg.private.enc by default' do
+      namespace :git_crypt do
+        described_class.define
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.encrypted_key_path)
+        .to(eq('.github/gpg.private.enc'))
+    end
+
+    it 'uses the provided encrypted key path when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          unlock_with_encrypted_gpg_key_encrypted_key_path:
+            '.circleci/gpg.private.enc'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.encrypted_key_path)
+        .to(eq('.circleci/gpg.private.enc'))
+    end
+
+    it 'uses a passphrase env var name of ENCRYPTION_PASSPHRASE by default' do
+      namespace :git_crypt do
+        described_class.define
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.passphrase_env_var_name)
+        .to(eq('ENCRYPTION_PASSPHRASE'))
+    end
+
+    it 'uses the provided passphrase env var name when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          unlock_with_encrypted_gpg_key_passphrase_env_var_name:
+            'CI_PASSPHRASE'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.passphrase_env_var_name)
+        .to(eq('CI_PASSPHRASE'))
+    end
+
+    it 'uses a nil GPG home directory by default' do
+      namespace :git_crypt do
+        described_class.define
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.gpg_home_directory).to(be_nil)
+    end
+
+    it 'uses the provided GPG home directory when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          gpg_home_directory: 'gpg-home'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.gpg_home_directory)
+        .to(eq('gpg-home'))
+    end
+
+    it 'uses /tmp as the GPG work directory by default' do
+      namespace :git_crypt do
+        described_class.define
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.gpg_work_directory).to(eq('/tmp'))
+    end
+
+    it 'uses the provided GPG work directory when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          gpg_work_directory: './tmp'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_with_encrypted_gpg_key']
+
+      expect(rake_task.creator.gpg_work_directory)
+        .to(eq('./tmp'))
+    end
+
+    it 'uses the provided unlock_with_encrypted_gpg_key task name ' \
+       'when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          unlock_with_encrypted_gpg_key_task_name: :unlock_with_key
+        )
+      end
+
+      expect(Rake.application)
+        .to(have_task_defined('git_crypt:unlock_with_key'))
     end
   end
 
