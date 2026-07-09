@@ -246,6 +246,29 @@ describe RakeGitCrypt::TaskSets::Standard do
         .to(eq('CI_PASSPHRASE'))
     end
 
+    it 'uses a nil GPG home directory by default' do
+      namespace :git_crypt do
+        described_class.define
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_ci']
+
+      expect(rake_task.creator.gpg_home_directory).to(be_nil)
+    end
+
+    it 'uses the provided GPG home directory when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          gpg_home_directory: 'gpg-home'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_ci']
+
+      expect(rake_task.creator.gpg_home_directory)
+        .to(eq('gpg-home'))
+    end
+
     it 'uses /tmp as the GPG work directory by default' do
       namespace :git_crypt do
         described_class.define
@@ -254,6 +277,19 @@ describe RakeGitCrypt::TaskSets::Standard do
       rake_task = Rake::Task['git_crypt:unlock_ci']
 
       expect(rake_task.creator.gpg_work_directory).to(eq('/tmp'))
+    end
+
+    it 'uses the provided GPG work directory when supplied' do
+      namespace :git_crypt do
+        described_class.define(
+          gpg_work_directory: './tmp'
+        )
+      end
+
+      rake_task = Rake::Task['git_crypt:unlock_ci']
+
+      expect(rake_task.creator.gpg_work_directory)
+        .to(eq('./tmp'))
     end
 
     it 'uses the provided unlock_ci task name when supplied' do

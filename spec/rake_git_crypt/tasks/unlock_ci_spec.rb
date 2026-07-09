@@ -56,7 +56,7 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     expect(RubyGitCrypt).to(have_received(:unlock).ordered)
   end
 
-  it 'decrypts the key with openssl aes-256-cbc using an sha1 digest' do
+  it 'decrypts the key with openssl aes-256-cbc using a sha1 digest' do
     define_task
     set_passphrase
     stub_encrypted_key
@@ -179,6 +179,115 @@ describe RakeGitCrypt::Tasks::UnlockCI do
     expect(RubyGitCrypt).to(have_received(:unlock))
   end
 
+  it 'imports the key into a temporary GPG home directory by default' do
+    define_task
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_mktmpdir(home_directory: '/tmp/home-12345678')
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(RubyGPG2)
+      .to(have_received(:import)
+            .with(hash_including(home_directory: '/tmp/home-12345678')))
+  end
+
+  it 'creates the temporary GPG home directory under the GPG work ' \
+     'directory' do
+    define_task(gpg_work_directory: '/custom/work')
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_mktmpdir(work_directory: '/custom/work')
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(Dir)
+      .to(have_received(:mktmpdir).with('home', '/custom/work'))
+  end
+
+  it 'unlocks git-crypt with the temporary GPG home directory as ' \
+     'GNUPGHOME by default' do
+    define_task
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_mktmpdir(home_directory: '/tmp/home-12345678')
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:unlock)
+            .with(anything,
+                  a_hash_including(
+                    environment: { GNUPGHOME: '/tmp/home-12345678' }
+                  )))
+  end
+
+  it 'imports the key into the specified GPG home directory when provided' do
+    define_task(gpg_home_directory: 'nested/home/directory')
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_file_utils_mkdir_p
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(RubyGPG2)
+      .to(have_received(:import)
+            .with(hash_including(home_directory: 'nested/home/directory')))
+  end
+
+  it 'ensures the specified GPG home directory exists when provided' do
+    define_task(gpg_home_directory: 'nested/home/directory')
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_file_utils_mkdir_p
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(FileUtils)
+      .to(have_received(:mkdir_p).with('nested/home/directory'))
+  end
+
+  it 'unlocks git-crypt with the specified GPG home directory as ' \
+     'GNUPGHOME when provided' do
+    define_task(gpg_home_directory: 'nested/home/directory')
+    set_passphrase
+    stub_encrypted_key
+    stub_output
+    stub_openssl
+    stub_file_utils_mkdir_p
+    stub_gpg_import
+    stub_git_crypt_unlock
+
+    Rake::Task['git_crypt:unlock_ci'].invoke
+
+    expect(RubyGitCrypt)
+      .to(have_received(:unlock)
+            .with(anything,
+                  a_hash_including(
+                    environment: { GNUPGHOME: 'nested/home/directory' }
+                  )))
+  end
+
   it 'raises a clear error when the passphrase env var is absent' do
     define_task
     ENV.delete('ENCRYPTION_PASSPHRASE')
@@ -239,6 +348,26 @@ describe RakeGitCrypt::Tasks::UnlockCI do
 
   def stub_gpg_import
     allow(RubyGPG2).to(receive(:import))
+  end
+
+  def stub_mktmpdir(
+    work_directory: '/tmp',
+    home_directory: '/tmp/home-00000000',
+    decrypt_directory: '/tmp/git-crypt-ci-00000000'
+  )
+    allow(Dir).to(receive(:mktmpdir).and_call_original)
+    allow(Dir)
+      .to(receive(:mktmpdir)
+            .with('home', work_directory)
+            .and_yield(home_directory))
+    allow(Dir)
+      .to(receive(:mktmpdir)
+            .with('git-crypt-ci', work_directory)
+            .and_yield(decrypt_directory))
+  end
+
+  def stub_file_utils_mkdir_p
+    allow(FileUtils).to(receive(:mkdir_p))
   end
 
   def stub_git_crypt_unlock

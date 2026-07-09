@@ -105,6 +105,9 @@ module RakeGitCrypt
              passphrase_env_var_name: RakeFactory::DynamicValue.new do |ts|
                ts.unlock_ci_passphrase_env_var_name
              end,
+             gpg_home_directory: RakeFactory::DynamicValue.new do |ts|
+               ts.gpg_home_directory
+             end,
              gpg_work_directory: RakeFactory::DynamicValue.new do |ts|
                ts.gpg_work_directory
              end

@@ -17,4 +17,8 @@ and this project adheres to
   unlocked in CI without exposing the passphrase on the process command line.
   The encrypted key path (default `.github/gpg.private.enc`) and passphrase
   environment variable name (default `ENCRYPTION_PASSPHRASE`) are both
-  configurable.
+  configurable. The CI GPG key is imported into a temporary GPG home directory
+  (under the configurable GPG work directory) which is also used for the
+  `git-crypt unlock`, so the key never lands in the default keyring and does
+  not persist after the task completes. A specific home directory can be set
+  via `gpg_home_directory`.

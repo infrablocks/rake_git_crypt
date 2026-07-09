@@ -29,6 +29,12 @@ OpenSSL-encrypted CI GPG private key, imports it into GPG and runs
 `git-crypt unlock`. The passphrase is read from an environment variable so
 that it never appears on the process command line.
 
+By default the key is imported into a temporary GPG home directory (created
+under the GPG work directory) which is used for both the import and the
+`git-crypt unlock`, so the CI private key never lands in the default keyring
+and does not persist after the task completes. A specific home directory can
+be provided via `gpg_home_directory`, in which case it is used as-is.
+
 ```ruby
 require 'rake_git_crypt'
 
@@ -41,7 +47,9 @@ RakeGitCrypt::Tasks::UnlockCI.define(
 Both parameters are optional and default to the values shown above. The task
 is also included in the standard task set, where the same settings can be
 provided via `unlock_ci_encrypted_key_path` and
-`unlock_ci_passphrase_env_var_name`.
+`unlock_ci_passphrase_env_var_name`, with the GPG home and work directories
+controlled by the shared `gpg_home_directory` and `gpg_work_directory`
+settings.
 
 The passphrase is expected to be provided as a secret (for example the
 `ENCRYPTION_PASSPHRASE` GitHub Actions or Dependabot secret) and exposed to
